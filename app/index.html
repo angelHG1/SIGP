@@ -1,0 +1,4537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGIP - Sistema de Gestión Inteligente de Parqueos | UCE</title>
+  <link rel="icon" type="image/svg+xml" href="public/logo.svg">
+  <link rel="alternate icon" type="image/png" href="public/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #ffffff;
+      --bg-surface: #f8fafc;
+      --bg-card: #ffffff;
+      --color-secondary: #20124d;
+      --color-secondary-light: #311c75;
+      --color-secondary-subtle: #f0eef8;
+
+      --color-free: #16a34a;
+      --color-free-bg: #dcfce7;
+      --color-free-border: #86efac;
+
+      --color-occupied: #dc2626;
+      --color-occupied-bg: #fee2e2;
+      --color-occupied-border: #fca5a5;
+
+      --color-warning: #d97706;
+      --color-warning-bg: #fef3c7;
+      --color-warning-border: #fcd34d;
+
+      /* Lighter asphalt slate color */
+      --color-asphalt: #556274;
+      --color-asphalt-edge: #3a4554;
+
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --border-color: #e2e8f0;
+      --border-dark: #cbd5e1;
+
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========================================================================
+       NAVBAR
+       ======================================================================== */
+    .navbar {
+      height: 64px;
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--color-secondary);
+      flex-shrink: 0;
+    }
+
+    .brand-logo-img {
+      height: 38px;
+      width: auto;
+      max-width: 65px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--color-secondary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .brand-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      line-height: 1.1;
+      color: var(--color-secondary);
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    /* Search Dropdown in Navbar */
+    .search-container {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .search-wrapper {
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 8px 14px;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .search-wrapper:hover,
+    .search-container.active .search-wrapper {
+      border-color: var(--color-secondary);
+      box-shadow: 0 0 0 3px rgba(32, 18, 77, 0.08);
+    }
+
+    .search-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--color-secondary);
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .search-chevron {
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .search-container.active .search-chevron {
+      transform: rotate(180deg);
+    }
+
+    .locations-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 6px;
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+      z-index: 100;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .search-container.active .locations-dropdown {
+      display: flex;
+    }
+
+    .location-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .location-item:hover {
+      background: var(--color-secondary-subtle);
+    }
+
+    .location-item.selected {
+      background: var(--color-secondary-subtle);
+    }
+
+    .location-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .location-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .location-city {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+
+    .badge-active {
+      background: var(--color-free-bg);
+      color: var(--color-free);
+      border: 1px solid var(--color-free-border);
+    }
+
+    .badge-soon {
+      background: #f1f5f9;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    /* ========================================================================
+       SUBHEADER BAR (STATUS & FILTERS)
+       ======================================================================== */
+    .subheader {
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 28px;
+      position: relative;
+      z-index: 50;
+    }
+
+    .subheader-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .loc-summary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .loc-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      background: var(--color-secondary-subtle);
+      color: var(--color-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .loc-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    .loc-texts {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .loc-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .loc-subtitle {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* Metric Pills */
+    .stats-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+    }
+
+    .stat-pill.free {
+      background: var(--color-free-bg);
+      border-color: var(--color-free-border);
+      color: #15803d;
+    }
+
+    .stat-pill.occupied {
+      background: var(--color-occupied-bg);
+      border-color: var(--color-occupied-border);
+      color: #b91c1c;
+    }
+
+    .stat-pill.warning {
+      background: var(--color-warning-bg);
+      border-color: var(--color-warning-border);
+      color: #b45309;
+    }
+
+    .stat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .stat-dot.free { background-color: var(--color-free); }
+    .stat-dot.occupied { background-color: var(--color-occupied); }
+    .stat-dot.warning { background-color: var(--color-warning); }
+
+    .stat-num {
+      font-weight: 800;
+    }
+
+    /* Filter Buttons */
+    .filters-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--color-secondary);
+      color: var(--color-secondary);
+    }
+
+    .filter-btn.active {
+      background: var(--color-secondary);
+      border-color: var(--color-secondary);
+      color: #ffffff;
+    }
+
+    /* ========================================================================
+       CANVAS VIEWPORT & PURE ZOOM ENGINE (NO CUTTING ON THE LEFT)
+       ======================================================================== */
+    .canvas-viewport {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: calc(100vh - 128px);
+      background-color: #f8fafc;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .map-svg {
+      width: 880px;
+      height: 866px;
+      display: block;
+      user-select: none;
+      overflow: visible;
+    }
+
+    /* Zoom Layer: scales smoothly and uniformly around center */
+    #zoomLayer {
+      transform-origin: 92px 91px;
+      will-change: transform;
+      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Floating Zoom Controls */
+    .zoom-widget {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      z-index: 40;
+    }
+
+    .zoom-btn {
+      width: 40px;
+      height: 40px;
+      background: #ffffff;
+      border: none;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--color-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .zoom-btn:last-child {
+      border-bottom: none;
+    }
+
+    .zoom-btn:hover {
+      background: var(--color-secondary-subtle);
+    }
+
+    .zoom-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    .zoom-badge {
+      position: absolute;
+      bottom: 24px;
+      right: 76px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--color-secondary);
+      pointer-events: none;
+      z-index: 40;
+    }
+
+    /* ========================================================================
+       SVG 2D PARKING LOT ELEMENTS
+       ======================================================================== */
+    .perimeter-asphalt {
+      fill: var(--color-asphalt);
+      stroke: var(--color-asphalt-edge);
+      stroke-width: 0.8;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+
+    .spot-node {
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .spot-rect {
+      stroke: #ffffff;
+      stroke-width: 0.35;
+      transition: stroke-width 0.15s ease, filter 0.15s ease;
+    }
+
+    .spot-node[data-status="free"] .spot-rect {
+      fill: var(--color-free);
+    }
+    .spot-node[data-status="occupied"] .spot-rect {
+      fill: var(--color-occupied);
+    }
+    .spot-node[data-status="warning"] .spot-rect {
+      fill: var(--color-warning);
+    }
+
+    .spot-num {
+      font-size: 1.85px;
+      font-weight: 700;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      fill: #ffffff;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+      letter-spacing: -0.05px;
+    }
+
+    .spot-node:hover .spot-rect {
+      stroke-width: 0.65;
+      filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.9));
+    }
+
+    .spot-node.selected .spot-rect {
+      stroke: #ffffff;
+      stroke-width: 0.9;
+      filter: drop-shadow(0 0 4px #ffffff);
+    }
+
+    .spot-node.dimmed {
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    /* ========================================================================
+       DRAWER FOR SPOT DETAILS
+       ======================================================================== */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(2px);
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+
+    .drawer-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      max-width: 380px;
+      background: #ffffff;
+      box-shadow: -10px 0 25px rgba(0, 0, 0, 0.12);
+      z-index: 160;
+      transform: translateX(100%);
+      transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer.active {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-header-info h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--color-secondary);
+      letter-spacing: -0.3px;
+    }
+
+    .drawer-header-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .drawer-close {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      background: #ffffff;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .drawer-close:hover {
+      background: var(--color-secondary-subtle);
+      color: var(--color-secondary);
+      border-color: var(--color-secondary);
+    }
+
+    .drawer-close svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+    }
+
+    .drawer-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .drawer-card {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 1px solid;
+    }
+
+    .drawer-card.free {
+      background: var(--color-free-bg);
+      border-color: var(--color-free-border);
+      color: #15803d;
+    }
+
+    .drawer-card.occupied {
+      background: var(--color-occupied-bg);
+      border-color: var(--color-occupied-border);
+      color: #b91c1c;
+    }
+
+    .drawer-card.warning {
+      background: var(--color-warning-bg);
+      border-color: var(--color-warning-border);
+      color: #b45309;
+    }
+
+    .drawer-card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .drawer-card-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    .drawer-card-text h3 {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .drawer-card-text p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .details-table {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13px;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .detail-value {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .drawer-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .btn-maps {
+      width: 100%;
+      height: 48px;
+      background: var(--color-secondary);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s ease, transform 0.1s ease;
+      box-shadow: 0 4px 12px rgba(32, 18, 77, 0.25);
+    }
+
+    .btn-maps:hover {
+      background: var(--color-secondary-light);
+      transform: translateY(-1px);
+    }
+
+    .btn-maps svg {
+      width: 17px;
+      height: 17px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      background: var(--color-secondary);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 200;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .toast svg {
+      width: 18px;
+      height: 18px;
+      stroke: #ffffff;
+      stroke-width: 2.2;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       TOP NAVBAR
+       ======================================================================== -->
+  <header class="navbar">
+    <a href="#" class="brand">
+      <img src="public/logo.svg" alt="Logo SGIP" class="brand-logo-img" onerror="if(this.src.indexOf('public')!==-1){this.src='logo.svg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}" />
+      <div class="brand-icon" style="display:none;">
+        <svg viewBox="0 0 24 24">
+          <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.9 2 11.2 2 11.5V16c0 .6.4 1 1 1h2"></path>
+          <circle cx="7" cy="17" r="2"></circle>
+          <path d="M9 17h6"></path>
+          <circle cx="17" cy="17" r="2"></circle>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">SGIP</span>
+        <span class="brand-sub">Sistema de Gestión Inteligente de Parqueos</span>
+      </div>
+    </a>
+
+    <!-- Covered Locations Search dropdown -->
+    <div class="search-container" id="searchContainer">
+      <div class="search-wrapper" id="searchWrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="search-input" id="locationInput" value="Campus Principal UCE (San Pedro de Macorís)" readonly />
+        <svg class="search-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+
+      <div class="locations-dropdown" id="locationsDropdown">
+        <div class="location-item selected" data-active="true" data-name="Campus Principal UCE (San Pedro de Macorís)">
+          <div class="location-info">
+            <span class="location-name">Campus Principal UCE</span>
+            <span class="location-city">San Pedro de Macorís</span>
+          </div>
+          <span class="badge badge-active">Activo</span>
+        </div>
+        <div class="location-item" data-active="false" data-name="Multiplaza Higüey">
+          <div class="location-info">
+            <span class="location-name">Multiplaza Higüey</span>
+            <span class="location-city">Higüey, La Altagracia</span>
+          </div>
+          <span class="badge badge-soon">Próximamente</span>
+        </div>
+        <div class="location-item" data-active="false" data-name="Plaza de la Restauración">
+          <div class="location-info">
+            <span class="location-name">Plaza de la Restauración</span>
+            <span class="location-city">San Pedro de Macorís</span>
+          </div>
+          <span class="badge badge-soon">Próximamente</span>
+        </div>
+        <div class="location-item" data-active="false" data-name="Parqueo de la Basílica de Higüey">
+          <div class="location-info">
+            <span class="location-name">Parqueo de la Basílica de Higüey</span>
+            <span class="location-city">Higüey, La Altagracia</span>
+          </div>
+          <span class="badge badge-soon">Próximamente</span>
+        </div>
+        <div class="location-item" data-active="false" data-name="Jumbo San Pedro">
+          <div class="location-info">
+            <span class="location-name">Jumbo San Pedro</span>
+            <span class="location-city">San Pedro de Macorís</span>
+          </div>
+          <span class="badge badge-soon">Próximamente</span>
+        </div>
+        <div class="location-item" data-active="false" data-name="Multiplaza La Romana">
+          <div class="location-info">
+            <span class="location-name">Multiplaza La Romana</span>
+            <span class="location-city">La Romana</span>
+          </div>
+          <span class="badge badge-soon">Próximamente</span>
+        </div>
+        <div class="location-item" data-active="false" data-name="Jumbo La Romana">
+          <div class="location-info">
+            <span class="location-name">Jumbo La Romana</span>
+            <span class="location-city">La Romana</span>
+          </div>
+          <span class="badge badge-soon">Próximamente</span>
+        </div>
+        <div class="location-item" data-active="false" data-name="Bávaro City Center">
+          <div class="location-info">
+            <span class="location-name">Bávaro City Center</span>
+            <span class="location-city">Bávaro, Punta Cana</span>
+          </div>
+          <span class="badge badge-soon">Próximamente</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       HORIZONTAL SUBHEADER BAR (STATUS & FILTERS)
+       ======================================================================== -->
+  <section class="subheader">
+    <div class="subheader-inner">
+      <!-- Location Info -->
+      <div class="loc-summary">
+        <div class="loc-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
+        <div class="loc-texts">
+          <h1 class="loc-title">Campus Principal UCE</h1>
+          <p class="loc-subtitle">Estacionamiento Central (219 Plazas)</p>
+        </div>
+      </div>
+
+      <!-- Metric Pills -->
+      <div class="stats-group">
+        <div class="stat-pill free">
+          <span class="stat-dot free"></span>
+          <span class="stat-num" id="cntFree">84</span>
+          <span>Libres</span>
+        </div>
+        <div class="stat-pill occupied">
+          <span class="stat-dot occupied"></span>
+          <span class="stat-num" id="cntOcc">122</span>
+          <span>Ocupados</span>
+        </div>
+        <div class="stat-pill warning">
+          <span class="stat-dot warning"></span>
+          <span class="stat-num" id="cntWarn">13</span>
+          <span>Revisión</span>
+        </div>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="filters-group">
+        <button class="filter-btn active" data-filter="all">Todos (219)</button>
+        <button class="filter-btn" data-filter="free">Solo Libres</button>
+        <button class="filter-btn" data-filter="occupied">Solo Ocupados</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       MAIN CANVAS: 2D PARKING LOT (LIGHT ASPHALT + TREES + ZOOM ONLY)
+       ======================================================================== -->
+  <main class="canvas-viewport" id="mapContainer">
+
+    <!-- Floating Zoom Controls -->
+    <div class="zoom-widget">
+      <button class="zoom-btn" id="btnZoomIn" title="Acercar">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
+      <button class="zoom-btn" id="btnZoomOut" title="Alejar">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
+      <button class="zoom-btn" id="btnResetZoom" title="Restablecer (100%)">
+        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      </button>
+    </div>
+
+    <div class="zoom-badge" id="zoomBadge">100%</div>
+
+    <svg class="map-svg" viewBox="-8 -8 200 198">
+      <!-- Uniform Centered Zoom Layer (scales symmetrically in all directions) -->
+      <g id="zoomLayer">
+
+        <!-- 1. Perimeter Surroundings Trees (exterior) -->
+        <g id="perimeterTrees">
+        <circle cx="2.94" cy="79.13" r="2.99" fill="#196F3D" />
+        <circle cx="5.37" cy="76.99" r="3.63" fill="#27AE60" />
+        <circle cx="6.47" cy="71.68" r="2.46" fill="#1ABC9C" />
+        <circle cx="5.59" cy="70.28" r="2.97" fill="#1ABC9C" />
+        <circle cx="11.09" cy="71.69" r="3.62" fill="#27AE60" />
+        <circle cx="10.14" cy="71.33" r="2.77" fill="#196F3D" />
+        <circle cx="13.73" cy="70.05" r="3.21" fill="#1ABC9C" />
+        <circle cx="15.90" cy="70.53" r="2.48" fill="#1ABC9C" />
+        <circle cx="20.32" cy="67.25" r="4.14" fill="#1ABC9C" />
+        <circle cx="18.95" cy="65.96" r="2.53" fill="#196F3D" />
+        <circle cx="21.83" cy="64.13" r="4.11" fill="#196F3D" />
+        <circle cx="35.57" cy="56.48" r="3.25" fill="#1ABC9C" />
+        <circle cx="36.52" cy="55.37" r="3.90" fill="#27AE60" />
+        <circle cx="39.29" cy="52.80" r="3.07" fill="#1ABC9C" />
+        <circle cx="49.45" cy="46.67" r="2.52" fill="#1ABC9C" />
+        <circle cx="48.59" cy="46.45" r="3.59" fill="#27AE60" />
+        <circle cx="54.11" cy="43.06" r="4.73" fill="#196F3D" />
+        <circle cx="52.77" cy="42.09" r="2.31" fill="#1ABC9C" />
+        <circle cx="56.03" cy="43.62" r="3.01" fill="#1ABC9C" />
+        <circle cx="57.23" cy="44.79" r="2.23" fill="#196F3D" />
+        <circle cx="68.40" cy="39.42" r="4.39" fill="#27AE60" />
+        <circle cx="67.45" cy="38.30" r="2.86" fill="#1ABC9C" />
+        <circle cx="68.21" cy="38.31" r="2.44" fill="#1ABC9C" />
+        <circle cx="70.99" cy="35.13" r="4.43" fill="#196F3D" />
+        <circle cx="75.27" cy="34.78" r="4.72" fill="#27AE60" />
+        <circle cx="74.99" cy="34.70" r="2.55" fill="#196F3D" />
+        <circle cx="77.44" cy="30.46" r="3.81" fill="#196F3D" />
+        <circle cx="78.17" cy="29.96" r="2.93" fill="#27AE60" />
+        <circle cx="82.32" cy="27.00" r="4.31" fill="#196F3D" />
+        <circle cx="86.38" cy="25.72" r="2.40" fill="#27AE60" />
+        <circle cx="85.25" cy="24.93" r="2.05" fill="#1ABC9C" />
+        <circle cx="104.18" cy="13.95" r="3.69" fill="#196F3D" />
+        <circle cx="104.43" cy="15.23" r="3.31" fill="#27AE60" />
+        <circle cx="111.74" cy="11.27" r="2.41" fill="#1ABC9C" />
+        <circle cx="124.27" cy="3.10" r="4.17" fill="#1ABC9C" />
+        <circle cx="125.20" cy="2.65" r="3.59" fill="#196F3D" />
+        <circle cx="123.56" cy="3.91" r="4.65" fill="#1ABC9C" />
+        <circle cx="122.15" cy="4.81" r="2.70" fill="#196F3D" />
+        <circle cx="125.88" cy="0.42" r="3.01" fill="#27AE60" />
+        <circle cx="124.50" cy="-0.06" r="2.81" fill="#27AE60" />
+        <circle cx="131.76" cy="-2.21" r="2.89" fill="#1ABC9C" />
+        <circle cx="3.01" cy="80.31" r="2.79" fill="#196F3D" />
+        <circle cx="4.65" cy="80.34" r="4.35" fill="#196F3D" />
+        <circle cx="2.87" cy="83.50" r="3.77" fill="#196F3D" />
+        <circle cx="5.46" cy="85.13" r="3.07" fill="#1ABC9C" />
+        <circle cx="6.24" cy="85.88" r="2.37" fill="#27AE60" />
+        <circle cx="7.90" cy="89.37" r="3.93" fill="#1ABC9C" />
+        <circle cx="7.14" cy="88.46" r="2.15" fill="#196F3D" />
+        <circle cx="6.98" cy="92.46" r="3.34" fill="#1ABC9C" />
+        <circle cx="6.98" cy="93.14" r="2.97" fill="#196F3D" />
+        <circle cx="6.21" cy="94.73" r="4.03" fill="#196F3D" />
+        <circle cx="6.79" cy="95.91" r="2.91" fill="#196F3D" />
+        <circle cx="8.91" cy="101.81" r="4.27" fill="#27AE60" />
+        <circle cx="13.03" cy="106.38" r="4.23" fill="#1ABC9C" />
+        <circle cx="13.39" cy="105.42" r="3.51" fill="#196F3D" />
+        <circle cx="15.96" cy="106.32" r="2.56" fill="#196F3D" />
+        <circle cx="17.66" cy="111.15" r="4.29" fill="#27AE60" />
+        <circle cx="17.74" cy="114.49" r="3.73" fill="#196F3D" />
+        <circle cx="18.92" cy="113.56" r="2.86" fill="#27AE60" />
+        <circle cx="19.47" cy="113.15" r="4.32" fill="#196F3D" />
+        <circle cx="22.01" cy="118.80" r="2.97" fill="#27AE60" />
+        <circle cx="21.23" cy="117.54" r="3.21" fill="#1ABC9C" />
+        <circle cx="22.69" cy="119.54" r="2.83" fill="#196F3D" />
+        <circle cx="19.68" cy="123.10" r="4.46" fill="#27AE60" />
+        <circle cx="18.61" cy="123.36" r="2.26" fill="#196F3D" />
+        <circle cx="21.00" cy="124.14" r="3.53" fill="#1ABC9C" />
+        <circle cx="26.05" cy="129.42" r="3.16" fill="#1ABC9C" />
+        <circle cx="28.29" cy="129.57" r="2.78" fill="#1ABC9C" />
+        <circle cx="26.94" cy="129.55" r="2.36" fill="#196F3D" />
+        <circle cx="26.32" cy="130.96" r="4.26" fill="#196F3D" />
+        <circle cx="27.45" cy="131.93" r="2.37" fill="#196F3D" />
+        <circle cx="27.00" cy="136.22" r="2.49" fill="#1ABC9C" />
+        <circle cx="27.43" cy="135.21" r="2.91" fill="#1ABC9C" />
+        <circle cx="27.02" cy="137.70" r="3.78" fill="#27AE60" />
+        <circle cx="25.94" cy="136.86" r="2.33" fill="#27AE60" />
+        <circle cx="30.60" cy="143.24" r="2.79" fill="#27AE60" />
+        <circle cx="31.38" cy="143.15" r="3.53" fill="#196F3D" />
+        <circle cx="33.83" cy="144.34" r="3.34" fill="#196F3D" />
+        <circle cx="33.43" cy="144.47" r="2.99" fill="#196F3D" />
+        <circle cx="35.06" cy="147.34" r="3.58" fill="#27AE60" />
+        <circle cx="34.83" cy="146.59" r="2.18" fill="#196F3D" />
+        <circle cx="38.45" cy="152.31" r="4.04" fill="#27AE60" />
+        <circle cx="37.16" cy="153.48" r="3.50" fill="#27AE60" />
+        <circle cx="40.26" cy="155.36" r="4.49" fill="#27AE60" />
+        <circle cx="40.52" cy="158.28" r="4.55" fill="#196F3D" />
+        <circle cx="40.57" cy="157.15" r="2.66" fill="#1ABC9C" />
+        <circle cx="40.65" cy="161.35" r="4.53" fill="#196F3D" />
+        <circle cx="40.33" cy="161.43" r="3.11" fill="#27AE60" />
+        <circle cx="43.97" cy="164.20" r="4.17" fill="#27AE60" />
+        <circle cx="42.25" cy="167.42" r="3.39" fill="#1ABC9C" />
+        <circle cx="43.04" cy="170.64" r="4.37" fill="#27AE60" />
+        <circle cx="41.60" cy="169.28" r="2.99" fill="#1ABC9C" />
+        <circle cx="48.04" cy="172.57" r="2.56" fill="#196F3D" />
+        <circle cx="47.38" cy="173.13" r="3.65" fill="#27AE60" />
+        <circle cx="50.78" cy="175.10" r="2.71" fill="#1ABC9C" />
+        <circle cx="49.62" cy="174.08" r="2.92" fill="#196F3D" />
+        <circle cx="50.26" cy="177.30" r="3.57" fill="#27AE60" />
+        <circle cx="54.10" cy="184.51" r="3.24" fill="#27AE60" />
+        <circle cx="54.99" cy="183.37" r="2.60" fill="#27AE60" />
+        <circle cx="55.18" cy="182.05" r="4.31" fill="#1ABC9C" />
+        <circle cx="53.87" cy="182.87" r="3.23" fill="#1ABC9C" />
+        <circle cx="58.69" cy="181.20" r="4.18" fill="#1ABC9C" />
+        <circle cx="60.41" cy="180.05" r="4.35" fill="#196F3D" />
+        <circle cx="61.38" cy="181.44" r="3.35" fill="#1ABC9C" />
+        <circle cx="61.55" cy="177.67" r="3.91" fill="#1ABC9C" />
+        <circle cx="62.13" cy="176.35" r="3.18" fill="#27AE60" />
+        <circle cx="69.09" cy="175.15" r="3.58" fill="#1ABC9C" />
+        <circle cx="71.36" cy="173.62" r="3.51" fill="#1ABC9C" />
+        <circle cx="72.61" cy="172.36" r="3.29" fill="#27AE60" />
+        <circle cx="74.44" cy="174.88" r="4.63" fill="#1ABC9C" />
+        <circle cx="74.84" cy="174.25" r="3.07" fill="#196F3D" />
+        <circle cx="77.37" cy="175.90" r="3.14" fill="#27AE60" />
+        <circle cx="76.03" cy="175.45" r="2.20" fill="#27AE60" />
+        <circle cx="78.82" cy="173.82" r="2.90" fill="#196F3D" />
+        <circle cx="80.27" cy="173.75" r="2.87" fill="#1ABC9C" />
+        <circle cx="83.34" cy="169.28" r="3.19" fill="#27AE60" />
+        <circle cx="83.27" cy="171.39" r="2.45" fill="#27AE60" />
+        <circle cx="83.87" cy="171.53" r="2.16" fill="#1ABC9C" />
+        <circle cx="86.57" cy="166.69" r="2.72" fill="#27AE60" />
+        <circle cx="90.24" cy="169.27" r="4.77" fill="#27AE60" />
+        <circle cx="88.96" cy="168.00" r="2.22" fill="#27AE60" />
+        <circle cx="94.67" cy="167.59" r="3.12" fill="#196F3D" />
+        <circle cx="96.90" cy="163.25" r="4.28" fill="#1ABC9C" />
+        <circle cx="99.95" cy="164.74" r="2.56" fill="#27AE60" />
+        <circle cx="104.25" cy="165.24" r="2.94" fill="#196F3D" />
+        <circle cx="104.65" cy="161.03" r="2.62" fill="#1ABC9C" />
+        <circle cx="106.57" cy="164.33" r="3.09" fill="#27AE60" />
+        <circle cx="105.84" cy="163.51" r="3.45" fill="#27AE60" />
+        <circle cx="108.97" cy="158.57" r="3.01" fill="#1ABC9C" />
+        <circle cx="112.31" cy="160.95" r="4.52" fill="#196F3D" />
+        <circle cx="118.08" cy="156.07" r="4.50" fill="#1ABC9C" />
+        <circle cx="118.93" cy="157.33" r="3.00" fill="#27AE60" />
+        <circle cx="123.97" cy="156.81" r="3.95" fill="#1ABC9C" />
+        <circle cx="126.10" cy="157.09" r="3.44" fill="#1ABC9C" />
+        <circle cx="125.03" cy="156.97" r="3.48" fill="#1ABC9C" />
+        <circle cx="133.63" cy="153.89" r="4.35" fill="#27AE60" />
+        <circle cx="134.37" cy="152.44" r="2.93" fill="#196F3D" />
+        <circle cx="136.03" cy="151.84" r="4.22" fill="#27AE60" />
+        <circle cx="138.61" cy="152.03" r="3.84" fill="#196F3D" />
+        <circle cx="139.55" cy="150.65" r="3.86" fill="#27AE60" />
+        <circle cx="145.23" cy="147.34" r="2.65" fill="#196F3D" />
+        <circle cx="145.77" cy="146.39" r="3.22" fill="#27AE60" />
+        <circle cx="151.01" cy="146.30" r="2.87" fill="#27AE60" />
+        <circle cx="151.74" cy="145.11" r="3.01" fill="#1ABC9C" />
+        <circle cx="153.38" cy="145.66" r="3.74" fill="#1ABC9C" />
+        <circle cx="152.71" cy="146.85" r="2.36" fill="#27AE60" />
+        <circle cx="155.63" cy="145.01" r="4.66" fill="#1ABC9C" />
+        <circle cx="163.25" cy="140.25" r="3.31" fill="#1ABC9C" />
+        <circle cx="164.01" cy="140.82" r="2.08" fill="#1ABC9C" />
+        <circle cx="163.90" cy="138.82" r="3.71" fill="#1ABC9C" />
+        <circle cx="162.45" cy="138.16" r="3.10" fill="#1ABC9C" />
+        <circle cx="172.53" cy="138.99" r="3.17" fill="#1ABC9C" />
+        <circle cx="175.60" cy="135.36" r="2.70" fill="#1ABC9C" />
+        <circle cx="177.48" cy="136.62" r="4.00" fill="#27AE60" />
+        <circle cx="177.68" cy="135.35" r="2.75" fill="#27AE60" />
+        <circle cx="183.49" cy="134.90" r="2.56" fill="#1ABC9C" />
+        <circle cx="135.11" cy="5.52" r="3.35" fill="#1ABC9C" />
+        <circle cx="137.28" cy="7.80" r="3.02" fill="#196F3D" />
+        <circle cx="136.75" cy="7.74" r="2.65" fill="#196F3D" />
+        <circle cx="136.16" cy="12.44" r="2.40" fill="#27AE60" />
+        <circle cx="137.14" cy="11.17" r="3.31" fill="#196F3D" />
+        <circle cx="136.21" cy="15.28" r="3.32" fill="#1ABC9C" />
+        <circle cx="134.81" cy="15.68" r="2.80" fill="#27AE60" />
+        <circle cx="140.89" cy="18.42" r="3.04" fill="#1ABC9C" />
+        <circle cx="141.48" cy="18.67" r="3.71" fill="#196F3D" />
+        <circle cx="142.59" cy="19.83" r="3.21" fill="#196F3D" />
+        <circle cx="139.63" cy="21.92" r="3.40" fill="#196F3D" />
+        <circle cx="140.20" cy="26.69" r="4.21" fill="#196F3D" />
+        <circle cx="141.41" cy="26.41" r="3.20" fill="#1ABC9C" />
+        <circle cx="145.83" cy="30.13" r="3.47" fill="#196F3D" />
+        <circle cx="145.58" cy="30.78" r="3.01" fill="#196F3D" />
+        <circle cx="145.72" cy="32.62" r="3.62" fill="#27AE60" />
+        <circle cx="145.84" cy="32.74" r="2.06" fill="#27AE60" />
+        <circle cx="145.34" cy="36.49" r="3.90" fill="#27AE60" />
+        <circle cx="148.35" cy="41.93" r="3.44" fill="#196F3D" />
+        <circle cx="151.54" cy="41.19" r="2.66" fill="#1ABC9C" />
+        <circle cx="150.98" cy="40.17" r="3.58" fill="#27AE60" />
+        <circle cx="151.47" cy="48.13" r="3.19" fill="#1ABC9C" />
+        <circle cx="150.00" cy="49.35" r="3.10" fill="#27AE60" />
+        <circle cx="151.02" cy="48.34" r="3.12" fill="#1ABC9C" />
+        <circle cx="151.89" cy="48.77" r="2.99" fill="#27AE60" />
+        <circle cx="154.02" cy="50.34" r="4.54" fill="#27AE60" />
+        <circle cx="152.77" cy="49.41" r="2.38" fill="#1ABC9C" />
+        <circle cx="152.92" cy="54.82" r="3.52" fill="#1ABC9C" />
+        <circle cx="152.45" cy="54.58" r="2.38" fill="#1ABC9C" />
+        <circle cx="157.91" cy="57.16" r="4.35" fill="#27AE60" />
+        <circle cx="157.50" cy="56.08" r="2.60" fill="#1ABC9C" />
+        <circle cx="157.02" cy="61.77" r="3.36" fill="#27AE60" />
+        <circle cx="161.24" cy="66.90" r="2.64" fill="#196F3D" />
+        <circle cx="162.23" cy="70.81" r="3.72" fill="#1ABC9C" />
+        <circle cx="161.00" cy="70.69" r="2.33" fill="#1ABC9C" />
+        <circle cx="161.16" cy="70.80" r="3.38" fill="#1ABC9C" />
+        <circle cx="161.49" cy="74.28" r="2.73" fill="#1ABC9C" />
+        <circle cx="160.66" cy="73.11" r="2.18" fill="#1ABC9C" />
+        <circle cx="165.34" cy="78.20" r="3.41" fill="#196F3D" />
+        <circle cx="165.67" cy="77.75" r="2.60" fill="#27AE60" />
+        <circle cx="165.75" cy="83.19" r="3.52" fill="#27AE60" />
+        <circle cx="166.28" cy="82.20" r="2.17" fill="#196F3D" />
+        <circle cx="168.69" cy="85.35" r="2.46" fill="#1ABC9C" />
+        <circle cx="167.56" cy="86.59" r="2.04" fill="#27AE60" />
+        <circle cx="167.07" cy="87.18" r="3.08" fill="#196F3D" />
+        <circle cx="167.49" cy="87.32" r="2.70" fill="#27AE60" />
+        <circle cx="170.09" cy="93.73" r="3.31" fill="#27AE60" />
+        <circle cx="170.95" cy="92.42" r="3.14" fill="#196F3D" />
+        <circle cx="168.29" cy="92.45" r="2.59" fill="#27AE60" />
+        <circle cx="167.10" cy="91.10" r="3.15" fill="#196F3D" />
+        <circle cx="171.16" cy="98.07" r="3.70" fill="#1ABC9C" />
+        <circle cx="174.73" cy="101.41" r="4.36" fill="#27AE60" />
+        <circle cx="174.98" cy="102.36" r="3.56" fill="#196F3D" />
+        <circle cx="177.88" cy="108.26" r="3.93" fill="#27AE60" />
+        <circle cx="178.70" cy="112.78" r="2.51" fill="#196F3D" />
+        <circle cx="181.60" cy="115.55" r="3.47" fill="#196F3D" />
+        <circle cx="180.47" cy="114.18" r="2.13" fill="#1ABC9C" />
+        <circle cx="181.82" cy="116.60" r="3.83" fill="#196F3D" />
+        <circle cx="182.30" cy="116.38" r="3.38" fill="#27AE60" />
+        <circle cx="180.84" cy="119.92" r="4.24" fill="#196F3D" />
+        <circle cx="180.09" cy="118.83" r="2.32" fill="#196F3D" />
+        <circle cx="183.51" cy="123.52" r="3.03" fill="#1ABC9C" />
+        <circle cx="183.88" cy="123.95" r="2.25" fill="#196F3D" />
+        <circle cx="185.68" cy="125.79" r="3.50" fill="#27AE60" />
+        <circle cx="187.27" cy="130.42" r="3.90" fill="#27AE60" />
+        <circle cx="186.60" cy="131.01" r="2.14" fill="#1ABC9C" />
+        </g>
+
+        <!-- 2. Lighter Uniform Asphalt Polygon -->
+        <path id="perimetro" class="perimeter-asphalt" d="M 4.492,83.943 A 4.500,4.500 0 0,1 6.195,78.052 L 126.134,6.193 A 4.500,4.500 0 0,1 132.613,8.351 L 180.383,125.262 A 4.500,4.500 0 0,1 177.830,131.166 L 56.448,177.743 A 4.500,4.500 0 0,1 50.820,175.572 Z" />
+
+        <!-- 3. Central Gap Trees (between the two parking islands on top of asphalt) -->
+        <g id="centralTrees">
+        <circle cx="66.06" cy="20.70" r="4.76" fill="#196F3D" />
+        <circle cx="67.44" cy="19.97" r="3.60" fill="#27AE60" />
+        <circle cx="65.81" cy="20.75" r="2.91" fill="#1ABC9C" />
+        <circle cx="67.72" cy="19.60" r="3.51" fill="#196F3D" />
+        <circle cx="69.35" cy="20.53" r="3.16" fill="#27AE60" />
+        <circle cx="67.31" cy="19.41" r="3.22" fill="#1ABC9C" />
+        <circle cx="69.20" cy="23.38" r="4.21" fill="#196F3D" />
+        <circle cx="69.67" cy="23.59" r="3.16" fill="#27AE60" />
+        <circle cx="70.24" cy="31.17" r="3.75" fill="#196F3D" />
+        <circle cx="69.27" cy="31.91" r="3.52" fill="#27AE60" />
+        <circle cx="70.58" cy="33.33" r="3.26" fill="#196F3D" />
+        <circle cx="70.18" cy="31.91" r="3.90" fill="#27AE60" />
+        <circle cx="68.39" cy="34.90" r="3.55" fill="#196F3D" />
+        <circle cx="68.24" cy="34.84" r="3.11" fill="#27AE60" />
+        <circle cx="69.03" cy="33.98" r="3.10" fill="#1ABC9C" />
+        <circle cx="68.74" cy="37.21" r="3.88" fill="#196F3D" />
+        <circle cx="67.43" cy="38.09" r="3.11" fill="#27AE60" />
+        <circle cx="68.70" cy="36.40" r="2.96" fill="#1ABC9C" />
+        <circle cx="71.05" cy="36.94" r="4.50" fill="#196F3D" />
+        <circle cx="72.59" cy="35.32" r="3.04" fill="#27AE60" />
+        <circle cx="72.26" cy="36.66" r="2.51" fill="#1ABC9C" />
+        <circle cx="77.55" cy="40.51" r="4.24" fill="#196F3D" />
+        <circle cx="78.43" cy="38.85" r="3.83" fill="#27AE60" />
+        <circle cx="75.92" cy="47.57" r="3.20" fill="#196F3D" />
+        <circle cx="74.56" cy="45.96" r="3.33" fill="#27AE60" />
+        <circle cx="77.37" cy="46.37" r="2.76" fill="#1ABC9C" />
+        <circle cx="76.26" cy="51.59" r="4.57" fill="#196F3D" />
+        <circle cx="75.85" cy="52.57" r="3.24" fill="#27AE60" />
+        <circle cx="71.30" cy="52.90" r="3.94" fill="#196F3D" />
+        <circle cx="71.57" cy="53.19" r="3.25" fill="#27AE60" />
+        <circle cx="70.05" cy="51.61" r="2.53" fill="#1ABC9C" />
+        <circle cx="74.26" cy="64.87" r="3.41" fill="#27AE60" />
+        <circle cx="76.01" cy="63.08" r="2.49" fill="#1ABC9C" />
+        <circle cx="75.47" cy="64.57" r="3.20" fill="#27AE60" />
+        <circle cx="77.01" cy="64.37" r="2.47" fill="#1ABC9C" />
+        <circle cx="77.55" cy="68.25" r="4.06" fill="#196F3D" />
+        <circle cx="76.60" cy="69.11" r="2.71" fill="#27AE60" />
+        <circle cx="77.45" cy="68.89" r="2.38" fill="#1ABC9C" />
+        <circle cx="79.50" cy="69.66" r="3.56" fill="#196F3D" />
+        <circle cx="79.69" cy="68.03" r="3.14" fill="#27AE60" />
+        <circle cx="80.94" cy="69.29" r="2.62" fill="#1ABC9C" />
+        <circle cx="84.93" cy="75.23" r="3.60" fill="#196F3D" />
+        <circle cx="85.87" cy="76.10" r="3.05" fill="#27AE60" />
+        <circle cx="85.90" cy="76.16" r="2.70" fill="#1ABC9C" />
+        <circle cx="81.51" cy="78.96" r="3.83" fill="#196F3D" />
+        <circle cx="82.18" cy="77.39" r="3.05" fill="#27AE60" />
+        <circle cx="81.05" cy="77.83" r="2.53" fill="#1ABC9C" />
+        <circle cx="83.81" cy="77.80" r="3.38" fill="#196F3D" />
+        <circle cx="83.53" cy="78.21" r="3.69" fill="#27AE60" />
+        <circle cx="83.38" cy="79.26" r="2.83" fill="#1ABC9C" />
+        <circle cx="86.07" cy="82.50" r="3.96" fill="#196F3D" />
+        <circle cx="85.36" cy="83.14" r="3.10" fill="#27AE60" />
+        <circle cx="84.71" cy="81.57" r="2.26" fill="#1ABC9C" />
+        <circle cx="82.57" cy="81.99" r="3.85" fill="#196F3D" />
+        <circle cx="82.35" cy="81.02" r="3.11" fill="#27AE60" />
+        <circle cx="83.10" cy="84.29" r="4.56" fill="#196F3D" />
+        <circle cx="81.82" cy="84.39" r="3.58" fill="#27AE60" />
+        <circle cx="83.42" cy="84.20" r="2.47" fill="#1ABC9C" />
+        <circle cx="86.31" cy="92.54" r="3.95" fill="#196F3D" />
+        <circle cx="87.92" cy="93.63" r="3.53" fill="#27AE60" />
+        <circle cx="85.16" cy="91.10" r="3.04" fill="#1ABC9C" />
+        <circle cx="89.73" cy="89.91" r="4.44" fill="#196F3D" />
+        <circle cx="90.90" cy="91.29" r="3.92" fill="#27AE60" />
+        <circle cx="89.27" cy="91.04" r="2.64" fill="#1ABC9C" />
+        <circle cx="91.11" cy="97.29" r="4.07" fill="#196F3D" />
+        <circle cx="92.14" cy="98.44" r="3.58" fill="#27AE60" />
+        <circle cx="91.16" cy="98.51" r="3.19" fill="#1ABC9C" />
+        <circle cx="86.09" cy="101.17" r="3.52" fill="#196F3D" />
+        <circle cx="85.93" cy="101.00" r="3.73" fill="#27AE60" />
+        <circle cx="85.11" cy="100.35" r="2.28" fill="#1ABC9C" />
+        <circle cx="91.88" cy="104.36" r="4.55" fill="#196F3D" />
+        <circle cx="91.17" cy="104.15" r="2.71" fill="#27AE60" />
+        <circle cx="90.92" cy="105.51" r="2.23" fill="#1ABC9C" />
+        <circle cx="91.88" cy="106.44" r="3.92" fill="#196F3D" />
+        <circle cx="93.49" cy="105.73" r="3.62" fill="#27AE60" />
+        <circle cx="90.73" cy="106.58" r="2.59" fill="#1ABC9C" />
+        <circle cx="92.54" cy="104.64" r="3.49" fill="#196F3D" />
+        <circle cx="92.80" cy="103.77" r="3.23" fill="#27AE60" />
+        <circle cx="91.09" cy="113.51" r="4.12" fill="#196F3D" />
+        <circle cx="91.66" cy="113.04" r="3.22" fill="#27AE60" />
+        <circle cx="89.83" cy="114.53" r="2.34" fill="#1ABC9C" />
+        <circle cx="95.84" cy="115.95" r="4.12" fill="#196F3D" />
+        <circle cx="96.43" cy="114.44" r="2.66" fill="#27AE60" />
+        <circle cx="91.38" cy="118.89" r="3.68" fill="#196F3D" />
+        <circle cx="91.43" cy="119.84" r="3.58" fill="#27AE60" />
+        <circle cx="91.77" cy="117.95" r="2.67" fill="#1ABC9C" />
+        <circle cx="95.89" cy="117.21" r="3.54" fill="#196F3D" />
+        <circle cx="96.49" cy="118.04" r="3.98" fill="#27AE60" />
+        <circle cx="96.20" cy="122.40" r="3.86" fill="#196F3D" />
+        <circle cx="95.56" cy="122.17" r="3.69" fill="#27AE60" />
+        <circle cx="95.08" cy="121.11" r="2.25" fill="#1ABC9C" />
+        <circle cx="99.72" cy="124.91" r="4.79" fill="#196F3D" />
+        <circle cx="98.05" cy="125.04" r="2.93" fill="#27AE60" />
+        <circle cx="101.01" cy="123.52" r="2.33" fill="#1ABC9C" />
+        <circle cx="91.87" cy="124.65" r="3.22" fill="#196F3D" />
+        <circle cx="90.89" cy="124.07" r="2.65" fill="#27AE60" />
+        <circle cx="91.24" cy="126.11" r="2.73" fill="#1ABC9C" />
+        <circle cx="101.28" cy="130.92" r="3.51" fill="#196F3D" />
+        <circle cx="101.11" cy="131.73" r="3.67" fill="#27AE60" />
+        <circle cx="102.19" cy="132.30" r="2.54" fill="#1ABC9C" />
+        <circle cx="96.23" cy="134.60" r="4.41" fill="#196F3D" />
+        <circle cx="97.90" cy="134.91" r="3.80" fill="#27AE60" />
+        <circle cx="95.64" cy="133.37" r="3.10" fill="#1ABC9C" />
+        <circle cx="93.26" cy="137.77" r="3.87" fill="#196F3D" />
+        <circle cx="94.86" cy="137.52" r="3.74" fill="#27AE60" />
+        <circle cx="92.81" cy="136.66" r="2.56" fill="#1ABC9C" />
+        <circle cx="103.22" cy="136.41" r="3.67" fill="#196F3D" />
+        <circle cx="102.16" cy="138.15" r="3.31" fill="#27AE60" />
+        <circle cx="102.46" cy="137.19" r="3.20" fill="#1ABC9C" />
+        <circle cx="103.84" cy="141.73" r="4.34" fill="#196F3D" />
+        <circle cx="105.04" cy="142.51" r="2.66" fill="#27AE60" />
+        <circle cx="105.31" cy="141.35" r="2.66" fill="#1ABC9C" />
+        <circle cx="97.57" cy="147.09" r="3.47" fill="#196F3D" />
+        <circle cx="96.06" cy="146.20" r="3.03" fill="#27AE60" />
+        <circle cx="98.67" cy="147.20" r="2.73" fill="#1ABC9C" />
+        <circle cx="98.26" cy="148.64" r="3.44" fill="#196F3D" />
+        <circle cx="98.51" cy="149.21" r="2.87" fill="#27AE60" />
+        <circle cx="101.69" cy="147.44" r="3.53" fill="#196F3D" />
+        <circle cx="102.85" cy="145.89" r="2.95" fill="#27AE60" />
+        <circle cx="102.17" cy="150.27" r="4.30" fill="#196F3D" />
+        <circle cx="103.21" cy="151.28" r="3.75" fill="#27AE60" />
+        <circle cx="103.00" cy="151.66" r="2.34" fill="#1ABC9C" />
+        <circle cx="106.24" cy="156.96" r="3.90" fill="#196F3D" />
+        <circle cx="105.23" cy="156.17" r="2.90" fill="#27AE60" />
+        <circle cx="100.69" cy="158.51" r="3.64" fill="#196F3D" />
+        <circle cx="99.36" cy="157.52" r="3.51" fill="#27AE60" />
+        <circle cx="101.44" cy="158.44" r="2.70" fill="#1ABC9C" />
+        <circle cx="108.63" cy="163.01" r="4.35" fill="#196F3D" />
+        <circle cx="109.49" cy="162.01" r="3.30" fill="#27AE60" />
+        <circle cx="109.41" cy="163.29" r="2.57" fill="#1ABC9C" />
+        <circle cx="102.02" cy="162.34" r="4.65" fill="#196F3D" />
+        <circle cx="103.23" cy="163.31" r="2.60" fill="#27AE60" />
+        <circle cx="101.41" cy="163.16" r="3.29" fill="#1ABC9C" />
+        <circle cx="106.58" cy="168.44" r="3.46" fill="#196F3D" />
+        <circle cx="106.88" cy="168.62" r="3.62" fill="#27AE60" />
+        <circle cx="106.79" cy="167.89" r="2.32" fill="#1ABC9C" />
+        <circle cx="108.08" cy="169.18" r="3.66" fill="#196F3D" />
+        <circle cx="109.52" cy="167.73" r="3.18" fill="#27AE60" />
+        <circle cx="106.77" cy="169.09" r="3.35" fill="#1ABC9C" />
+        <circle cx="109.31" cy="171.50" r="3.93" fill="#196F3D" />
+        <circle cx="107.78" cy="171.28" r="3.12" fill="#27AE60" />
+        <circle cx="110.22" cy="171.52" r="3.37" fill="#1ABC9C" />
+        </g>
+
+        <!-- 4. Parking Aisles & Spots -->
+        <g id="parkingLots">
+      <g id="L1" transform="translate(14.490, 93.520) rotate(-31.50)">
+        <g class="spot-node" data-id="L1-A01" data-status="free">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="L1-A02" data-status="occupied">
+          <rect class="spot-rect" x="3.540" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.190" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="L1-A03" data-status="free">
+          <rect class="spot-rect" x="7.080" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="8.730" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="L1-A04" data-status="occupied">
+          <rect class="spot-rect" x="10.620" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="12.270" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="L1-A05" data-status="occupied">
+          <rect class="spot-rect" x="14.160" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="15.810" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="L1-A06" data-status="free">
+          <rect class="spot-rect" x="17.700" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="19.350" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="L1-A07" data-status="free">
+          <rect class="spot-rect" x="21.240" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="22.890" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="L1-A08" data-status="free">
+          <rect class="spot-rect" x="24.780" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="26.430" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="L1-A09" data-status="occupied">
+          <rect class="spot-rect" x="28.320" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.970" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="L1-B01" data-status="free">
+          <rect class="spot-rect" x="0.000" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="12.850">01</text>
+        </g>
+        <g class="spot-node" data-id="L1-B02" data-status="occupied">
+          <rect class="spot-rect" x="3.540" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.190" y="12.850">02</text>
+        </g>
+        <g class="spot-node" data-id="L1-B03" data-status="free">
+          <rect class="spot-rect" x="7.080" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="8.730" y="12.850">03</text>
+        </g>
+        <g class="spot-node" data-id="L1-B04" data-status="free">
+          <rect class="spot-rect" x="10.620" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="12.270" y="12.850">04</text>
+        </g>
+        <g class="spot-node" data-id="L1-B05" data-status="occupied">
+          <rect class="spot-rect" x="14.160" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="15.810" y="12.850">05</text>
+        </g>
+        <g class="spot-node" data-id="L1-B06" data-status="occupied">
+          <rect class="spot-rect" x="17.700" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="19.350" y="12.850">06</text>
+        </g>
+        <g class="spot-node" data-id="L1-B07" data-status="free">
+          <rect class="spot-rect" x="21.240" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="22.890" y="12.850">07</text>
+        </g>
+        <g class="spot-node" data-id="L1-B08" data-status="free">
+          <rect class="spot-rect" x="24.780" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="26.430" y="12.850">08</text>
+        </g>
+        <g class="spot-node" data-id="L1-B09" data-status="free">
+          <rect class="spot-rect" x="28.320" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.970" y="12.850">09</text>
+        </g>
+      </g> <!-- end L1 -->
+      <g id="L2" transform="rotate(-31.5,219.57772,10.365522)">
+        <g class="spot-node" data-id="L2-A01" data-status="free">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="L2-A02" data-status="occupied">
+          <rect class="spot-rect" x="3.540" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.190" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="L2-A03" data-status="occupied">
+          <rect class="spot-rect" x="7.080" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="8.730" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="L2-A04" data-status="occupied">
+          <rect class="spot-rect" x="10.620" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="12.270" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="L2-A05" data-status="occupied">
+          <rect class="spot-rect" x="14.160" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="15.810" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="L2-A06" data-status="occupied">
+          <rect class="spot-rect" x="17.700" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="19.350" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="L2-A07" data-status="occupied">
+          <rect class="spot-rect" x="21.240" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="22.890" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="L2-A08" data-status="occupied">
+          <rect class="spot-rect" x="24.780" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="26.430" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="L2-A09" data-status="warning">
+          <rect class="spot-rect" x="28.320" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.970" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="L2-B01" data-status="free">
+          <rect class="spot-rect" x="0.000" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="12.850">01</text>
+        </g>
+        <g class="spot-node" data-id="L2-B02" data-status="free">
+          <rect class="spot-rect" x="3.540" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.190" y="12.850">02</text>
+        </g>
+        <g class="spot-node" data-id="L2-B03" data-status="warning">
+          <rect class="spot-rect" x="7.080" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="8.730" y="12.850">03</text>
+        </g>
+        <g class="spot-node" data-id="L2-B04" data-status="occupied">
+          <rect class="spot-rect" x="10.620" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="12.270" y="12.850">04</text>
+        </g>
+        <g class="spot-node" data-id="L2-B05" data-status="free">
+          <rect class="spot-rect" x="14.160" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="15.810" y="12.850">05</text>
+        </g>
+        <g class="spot-node" data-id="L2-B06" data-status="free">
+          <rect class="spot-rect" x="17.700" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="19.350" y="12.850">06</text>
+        </g>
+        <g class="spot-node" data-id="L2-B07" data-status="free">
+          <rect class="spot-rect" x="21.240" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="22.890" y="12.850">07</text>
+        </g>
+        <g class="spot-node" data-id="L2-B08" data-status="occupied">
+          <rect class="spot-rect" x="24.780" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="26.430" y="12.850">08</text>
+        </g>
+        <g class="spot-node" data-id="L2-B09" data-status="free">
+          <rect class="spot-rect" x="28.320" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.970" y="12.850">09</text>
+        </g>
+      </g> <!-- end L2 -->
+      <g id="L3" transform="rotate(-31.5,261.90956,-0.12037212)">
+        <g class="spot-node" data-id="L3-A01" data-status="occupied">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="L3-A02" data-status="free">
+          <rect class="spot-rect" x="3.540" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.190" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="L3-A03" data-status="occupied">
+          <rect class="spot-rect" x="7.080" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="8.730" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="L3-A04" data-status="occupied">
+          <rect class="spot-rect" x="10.620" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="12.270" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="L3-A05" data-status="free">
+          <rect class="spot-rect" x="14.160" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="15.810" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="L3-A06" data-status="occupied">
+          <rect class="spot-rect" x="17.700" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="19.350" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="L3-A07" data-status="occupied">
+          <rect class="spot-rect" x="21.240" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="22.890" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="L3-A08" data-status="occupied">
+          <rect class="spot-rect" x="24.780" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="26.430" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="L3-A09" data-status="free">
+          <rect class="spot-rect" x="28.320" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.970" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="L3-B01" data-status="warning">
+          <rect class="spot-rect" x="0.000" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="12.850">01</text>
+        </g>
+        <g class="spot-node" data-id="L3-B02" data-status="free">
+          <rect class="spot-rect" x="3.540" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.190" y="12.850">02</text>
+        </g>
+        <g class="spot-node" data-id="L3-B03" data-status="free">
+          <rect class="spot-rect" x="7.080" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="8.730" y="12.850">03</text>
+        </g>
+        <g class="spot-node" data-id="L3-B04" data-status="free">
+          <rect class="spot-rect" x="10.620" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="12.270" y="12.850">04</text>
+        </g>
+        <g class="spot-node" data-id="L3-B05" data-status="occupied">
+          <rect class="spot-rect" x="14.160" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="15.810" y="12.850">05</text>
+        </g>
+        <g class="spot-node" data-id="L3-B06" data-status="free">
+          <rect class="spot-rect" x="17.700" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="19.350" y="12.850">06</text>
+        </g>
+        <g class="spot-node" data-id="L3-B07" data-status="occupied">
+          <rect class="spot-rect" x="21.240" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="22.890" y="12.850">07</text>
+        </g>
+        <g class="spot-node" data-id="L3-B08" data-status="occupied">
+          <rect class="spot-rect" x="24.780" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="26.430" y="12.850">08</text>
+        </g>
+        <g class="spot-node" data-id="L3-B09" data-status="occupied">
+          <rect class="spot-rect" x="28.320" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.970" y="12.850">09</text>
+        </g>
+      </g> <!-- end L3 -->
+      <g id="L4" transform="rotate(-31.5,303.64197,-12.047235)">
+        <g class="spot-node" data-id="L4-A01" data-status="warning">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="L4-A02" data-status="occupied">
+          <rect class="spot-rect" x="3.540" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.190" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="L4-A03" data-status="free">
+          <rect class="spot-rect" x="7.080" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="8.730" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="L4-A04" data-status="occupied">
+          <rect class="spot-rect" x="10.620" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="12.270" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="L4-A05" data-status="free">
+          <rect class="spot-rect" x="14.160" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="15.810" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="L4-A06" data-status="occupied">
+          <rect class="spot-rect" x="17.700" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="19.350" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="L4-A07" data-status="occupied">
+          <rect class="spot-rect" x="21.240" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="22.890" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="L4-A08" data-status="occupied">
+          <rect class="spot-rect" x="24.780" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="26.430" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="L4-A09" data-status="free">
+          <rect class="spot-rect" x="28.320" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.970" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="L4-B01" data-status="free">
+          <rect class="spot-rect" x="0.000" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="12.850">01</text>
+        </g>
+        <g class="spot-node" data-id="L4-B02" data-status="occupied">
+          <rect class="spot-rect" x="3.540" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.190" y="12.850">02</text>
+        </g>
+        <g class="spot-node" data-id="L4-B03" data-status="occupied">
+          <rect class="spot-rect" x="7.080" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="8.730" y="12.850">03</text>
+        </g>
+        <g class="spot-node" data-id="L4-B04" data-status="occupied">
+          <rect class="spot-rect" x="10.620" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="12.270" y="12.850">04</text>
+        </g>
+        <g class="spot-node" data-id="L4-B05" data-status="free">
+          <rect class="spot-rect" x="14.160" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="15.810" y="12.850">05</text>
+        </g>
+        <g class="spot-node" data-id="L4-B06" data-status="occupied">
+          <rect class="spot-rect" x="17.700" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="19.350" y="12.850">06</text>
+        </g>
+        <g class="spot-node" data-id="L4-B07" data-status="occupied">
+          <rect class="spot-rect" x="21.240" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="22.890" y="12.850">07</text>
+        </g>
+        <g class="spot-node" data-id="L4-B08" data-status="occupied">
+          <rect class="spot-rect" x="24.780" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="26.430" y="12.850">08</text>
+        </g>
+        <g class="spot-node" data-id="L4-B09" data-status="occupied">
+          <rect class="spot-rect" x="28.320" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.970" y="12.850">09</text>
+        </g>
+      </g> <!-- end L4 -->
+      <g id="LW-top" transform="translate(29.050, 64.150) rotate(-30.70)">
+        <g class="spot-node" data-id="LW-top-01" data-status="occupied">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="LW-top-02" data-status="occupied">
+          <rect class="spot-rect" x="3.686" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.336" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="LW-top-03" data-status="warning">
+          <rect class="spot-rect" x="7.372" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.022" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="LW-top-04" data-status="free">
+          <rect class="spot-rect" x="11.058" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="12.708" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="LW-top-05" data-status="occupied">
+          <rect class="spot-rect" x="14.744" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="16.394" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="LW-top-06" data-status="occupied">
+          <rect class="spot-rect" x="18.430" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="20.080" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="LW-top-07" data-status="occupied">
+          <rect class="spot-rect" x="22.116" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="23.766" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="LW-top-08" data-status="free">
+          <rect class="spot-rect" x="25.802" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="27.452" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="LW-top-09" data-status="occupied">
+          <rect class="spot-rect" x="29.488" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="31.138" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="LW-top-10" data-status="occupied">
+          <rect class="spot-rect" x="33.174" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="34.824" y="4.250">10</text>
+        </g>
+        <g class="spot-node" data-id="LW-top-11" data-status="free">
+          <rect class="spot-rect" x="36.860" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="38.510" y="4.250">11</text>
+        </g>
+      </g> <!-- end LW-top -->
+      <g id="LE-top" transform="translate(86.830, 29.460) rotate(-30.70)">
+        <g class="spot-node" data-id="LE-top-01" data-status="occupied">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="LE-top-02" data-status="occupied">
+          <rect class="spot-rect" x="3.686" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.336" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="LE-top-03" data-status="free">
+          <rect class="spot-rect" x="7.372" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.022" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="LE-top-04" data-status="free">
+          <rect class="spot-rect" x="11.058" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="12.708" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="LE-top-05" data-status="occupied">
+          <rect class="spot-rect" x="14.744" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="16.394" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="LE-top-06" data-status="occupied">
+          <rect class="spot-rect" x="18.430" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="20.080" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="LE-top-07" data-status="occupied">
+          <rect class="spot-rect" x="22.116" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="23.766" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="LE-top-08" data-status="occupied">
+          <rect class="spot-rect" x="25.802" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="27.452" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="LE-top-09" data-status="free">
+          <rect class="spot-rect" x="29.488" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="31.138" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="LE-top-10" data-status="occupied">
+          <rect class="spot-rect" x="33.174" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="34.824" y="4.250">10</text>
+        </g>
+        <g class="spot-node" data-id="LE-top-11" data-status="warning">
+          <rect class="spot-rect" x="36.860" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="38.510" y="4.250">11</text>
+        </g>
+      </g> <!-- end LE-top -->
+      <g id="R1" transform="rotate(-31.5,138.08264,-111.79919)">
+        <g class="spot-node" data-id="R1-A01" data-status="free">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="R1-A02" data-status="occupied">
+          <rect class="spot-rect" x="3.912" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.562" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="R1-A03" data-status="occupied">
+          <rect class="spot-rect" x="7.823" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.473" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="R1-A04" data-status="free">
+          <rect class="spot-rect" x="11.735" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="13.385" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="R1-A05" data-status="occupied">
+          <rect class="spot-rect" x="15.646" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="17.296" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="R1-A06" data-status="occupied">
+          <rect class="spot-rect" x="19.558" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="21.208" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="R1-A07" data-status="occupied">
+          <rect class="spot-rect" x="23.469" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="25.119" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="R1-A08" data-status="warning">
+          <rect class="spot-rect" x="27.381" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.031" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="R1-A09" data-status="occupied">
+          <rect class="spot-rect" x="31.292" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="32.942" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="R1-A10" data-status="occupied">
+          <rect class="spot-rect" x="35.204" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="36.854" y="4.250">10</text>
+        </g>
+        <g class="spot-node" data-id="R1-A11" data-status="warning">
+          <rect class="spot-rect" x="39.115" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="40.765" y="4.250">11</text>
+        </g>
+        <g class="spot-node" data-id="R1-A12" data-status="occupied">
+          <rect class="spot-rect" x="43.027" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="44.677" y="4.250">12</text>
+        </g>
+        <g class="spot-node" data-id="R1-A13" data-status="free">
+          <rect class="spot-rect" x="46.938" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="48.588" y="4.250">13</text>
+        </g>
+        <g class="spot-node" data-id="R1-A14" data-status="occupied">
+          <rect class="spot-rect" x="50.850" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="52.500" y="4.250">14</text>
+        </g>
+        <g class="spot-node" data-id="R1-B01" data-status="occupied">
+          <rect class="spot-rect" x="0.000" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="12.850">01</text>
+        </g>
+        <g class="spot-node" data-id="R1-B02" data-status="free">
+          <rect class="spot-rect" x="3.912" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.562" y="12.850">02</text>
+        </g>
+        <g class="spot-node" data-id="R1-B03" data-status="occupied">
+          <rect class="spot-rect" x="7.823" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.473" y="12.850">03</text>
+        </g>
+        <g class="spot-node" data-id="R1-B04" data-status="free">
+          <rect class="spot-rect" x="11.735" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="13.385" y="12.850">04</text>
+        </g>
+        <g class="spot-node" data-id="R1-B05" data-status="occupied">
+          <rect class="spot-rect" x="15.646" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="17.296" y="12.850">05</text>
+        </g>
+        <g class="spot-node" data-id="R1-B06" data-status="occupied">
+          <rect class="spot-rect" x="19.558" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="21.208" y="12.850">06</text>
+        </g>
+        <g class="spot-node" data-id="R1-B07" data-status="occupied">
+          <rect class="spot-rect" x="23.469" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="25.119" y="12.850">07</text>
+        </g>
+        <g class="spot-node" data-id="R1-B08" data-status="occupied">
+          <rect class="spot-rect" x="27.381" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.031" y="12.850">08</text>
+        </g>
+        <g class="spot-node" data-id="R1-B09" data-status="occupied">
+          <rect class="spot-rect" x="31.292" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="32.942" y="12.850">09</text>
+        </g>
+        <g class="spot-node" data-id="R1-B10" data-status="free">
+          <rect class="spot-rect" x="35.204" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="36.854" y="12.850">10</text>
+        </g>
+        <g class="spot-node" data-id="R1-B11" data-status="occupied">
+          <rect class="spot-rect" x="39.115" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="40.765" y="12.850">11</text>
+        </g>
+        <g class="spot-node" data-id="R1-B12" data-status="free">
+          <rect class="spot-rect" x="43.027" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="44.677" y="12.850">12</text>
+        </g>
+        <g class="spot-node" data-id="R1-B13" data-status="occupied">
+          <rect class="spot-rect" x="46.938" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="48.588" y="12.850">13</text>
+        </g>
+        <g class="spot-node" data-id="R1-B14" data-status="free">
+          <rect class="spot-rect" x="50.850" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="52.500" y="12.850">14</text>
+        </g>
+      </g> <!-- end R1 -->
+      <g id="R2" transform="translate(91.570, 76.600) rotate(-31.50)">
+        <g class="spot-node" data-id="R2-A01" data-status="free">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="R2-A02" data-status="occupied">
+          <rect class="spot-rect" x="3.912" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.562" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="R2-A03" data-status="occupied">
+          <rect class="spot-rect" x="7.823" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.473" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="R2-A04" data-status="free">
+          <rect class="spot-rect" x="11.735" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="13.385" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="R2-A05" data-status="occupied">
+          <rect class="spot-rect" x="15.646" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="17.296" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="R2-A06" data-status="occupied">
+          <rect class="spot-rect" x="19.558" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="21.208" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="R2-A07" data-status="free">
+          <rect class="spot-rect" x="23.469" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="25.119" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="R2-A08" data-status="free">
+          <rect class="spot-rect" x="27.381" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.031" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="R2-A09" data-status="occupied">
+          <rect class="spot-rect" x="31.292" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="32.942" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="R2-A10" data-status="free">
+          <rect class="spot-rect" x="35.204" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="36.854" y="4.250">10</text>
+        </g>
+        <g class="spot-node" data-id="R2-A11" data-status="occupied">
+          <rect class="spot-rect" x="39.115" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="40.765" y="4.250">11</text>
+        </g>
+        <g class="spot-node" data-id="R2-A12" data-status="occupied">
+          <rect class="spot-rect" x="43.027" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="44.677" y="4.250">12</text>
+        </g>
+        <g class="spot-node" data-id="R2-A13" data-status="occupied">
+          <rect class="spot-rect" x="46.938" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="48.588" y="4.250">13</text>
+        </g>
+        <g class="spot-node" data-id="R2-A14" data-status="warning">
+          <rect class="spot-rect" x="50.850" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="52.500" y="4.250">14</text>
+        </g>
+        <g class="spot-node" data-id="R2-B01" data-status="occupied">
+          <rect class="spot-rect" x="0.000" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="12.850">01</text>
+        </g>
+        <g class="spot-node" data-id="R2-B02" data-status="free">
+          <rect class="spot-rect" x="3.912" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.562" y="12.850">02</text>
+        </g>
+        <g class="spot-node" data-id="R2-B03" data-status="free">
+          <rect class="spot-rect" x="7.823" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.473" y="12.850">03</text>
+        </g>
+        <g class="spot-node" data-id="R2-B04" data-status="free">
+          <rect class="spot-rect" x="11.735" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="13.385" y="12.850">04</text>
+        </g>
+        <g class="spot-node" data-id="R2-B05" data-status="free">
+          <rect class="spot-rect" x="15.646" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="17.296" y="12.850">05</text>
+        </g>
+        <g class="spot-node" data-id="R2-B06" data-status="occupied">
+          <rect class="spot-rect" x="19.558" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="21.208" y="12.850">06</text>
+        </g>
+        <g class="spot-node" data-id="R2-B07" data-status="occupied">
+          <rect class="spot-rect" x="23.469" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="25.119" y="12.850">07</text>
+        </g>
+        <g class="spot-node" data-id="R2-B08" data-status="free">
+          <rect class="spot-rect" x="27.381" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.031" y="12.850">08</text>
+        </g>
+        <g class="spot-node" data-id="R2-B09" data-status="occupied">
+          <rect class="spot-rect" x="31.292" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="32.942" y="12.850">09</text>
+        </g>
+        <g class="spot-node" data-id="R2-B10" data-status="occupied">
+          <rect class="spot-rect" x="35.204" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="36.854" y="12.850">10</text>
+        </g>
+        <g class="spot-node" data-id="R2-B11" data-status="occupied">
+          <rect class="spot-rect" x="39.115" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="40.765" y="12.850">11</text>
+        </g>
+        <g class="spot-node" data-id="R2-B12" data-status="occupied">
+          <rect class="spot-rect" x="43.027" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="44.677" y="12.850">12</text>
+        </g>
+        <g class="spot-node" data-id="R2-B13" data-status="free">
+          <rect class="spot-rect" x="46.938" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="48.588" y="12.850">13</text>
+        </g>
+        <g class="spot-node" data-id="R2-B14" data-status="occupied">
+          <rect class="spot-rect" x="50.850" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="52.500" y="12.850">14</text>
+        </g>
+      </g> <!-- end R2 -->
+      <g id="R3" transform="rotate(-31.5,229.92611,-132.23128)">
+        <g class="spot-node" data-id="R3-A01" data-status="occupied">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="R3-A02" data-status="free">
+          <rect class="spot-rect" x="3.912" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.562" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="R3-A03" data-status="free">
+          <rect class="spot-rect" x="7.823" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.473" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="R3-A04" data-status="occupied">
+          <rect class="spot-rect" x="11.735" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="13.385" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="R3-A05" data-status="free">
+          <rect class="spot-rect" x="15.646" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="17.296" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="R3-A06" data-status="free">
+          <rect class="spot-rect" x="19.558" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="21.208" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="R3-A07" data-status="occupied">
+          <rect class="spot-rect" x="23.469" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="25.119" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="R3-A08" data-status="occupied">
+          <rect class="spot-rect" x="27.381" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.031" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="R3-A09" data-status="occupied">
+          <rect class="spot-rect" x="31.292" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="32.942" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="R3-A10" data-status="free">
+          <rect class="spot-rect" x="35.204" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="36.854" y="4.250">10</text>
+        </g>
+        <g class="spot-node" data-id="R3-A11" data-status="occupied">
+          <rect class="spot-rect" x="39.115" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="40.765" y="4.250">11</text>
+        </g>
+        <g class="spot-node" data-id="R3-A12" data-status="free">
+          <rect class="spot-rect" x="43.027" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="44.677" y="4.250">12</text>
+        </g>
+        <g class="spot-node" data-id="R3-A13" data-status="occupied">
+          <rect class="spot-rect" x="46.938" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="48.588" y="4.250">13</text>
+        </g>
+        <g class="spot-node" data-id="R3-A14" data-status="free">
+          <rect class="spot-rect" x="50.850" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="52.500" y="4.250">14</text>
+        </g>
+        <g class="spot-node" data-id="R3-B01" data-status="occupied">
+          <rect class="spot-rect" x="0.000" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="12.850">01</text>
+        </g>
+        <g class="spot-node" data-id="R3-B02" data-status="occupied">
+          <rect class="spot-rect" x="3.912" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.562" y="12.850">02</text>
+        </g>
+        <g class="spot-node" data-id="R3-B03" data-status="free">
+          <rect class="spot-rect" x="7.823" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.473" y="12.850">03</text>
+        </g>
+        <g class="spot-node" data-id="R3-B04" data-status="free">
+          <rect class="spot-rect" x="11.735" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="13.385" y="12.850">04</text>
+        </g>
+        <g class="spot-node" data-id="R3-B05" data-status="occupied">
+          <rect class="spot-rect" x="15.646" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="17.296" y="12.850">05</text>
+        </g>
+        <g class="spot-node" data-id="R3-B06" data-status="occupied">
+          <rect class="spot-rect" x="19.558" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="21.208" y="12.850">06</text>
+        </g>
+        <g class="spot-node" data-id="R3-B07" data-status="occupied">
+          <rect class="spot-rect" x="23.469" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="25.119" y="12.850">07</text>
+        </g>
+        <g class="spot-node" data-id="R3-B08" data-status="free">
+          <rect class="spot-rect" x="27.381" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.031" y="12.850">08</text>
+        </g>
+        <g class="spot-node" data-id="R3-B09" data-status="occupied">
+          <rect class="spot-rect" x="31.292" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="32.942" y="12.850">09</text>
+        </g>
+        <g class="spot-node" data-id="R3-B10" data-status="occupied">
+          <rect class="spot-rect" x="35.204" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="36.854" y="12.850">10</text>
+        </g>
+        <g class="spot-node" data-id="R3-B11" data-status="warning">
+          <rect class="spot-rect" x="39.115" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="40.765" y="12.850">11</text>
+        </g>
+        <g class="spot-node" data-id="R3-B12" data-status="occupied">
+          <rect class="spot-rect" x="43.027" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="44.677" y="12.850">12</text>
+        </g>
+        <g class="spot-node" data-id="R3-B13" data-status="occupied">
+          <rect class="spot-rect" x="46.938" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="48.588" y="12.850">13</text>
+        </g>
+        <g class="spot-node" data-id="R3-B14" data-status="free">
+          <rect class="spot-rect" x="50.850" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="52.500" y="12.850">14</text>
+        </g>
+      </g> <!-- end R3 -->
+      <g id="R4" transform="rotate(-25.5,324.57991,-193.00244)">
+        <g class="spot-node" data-id="R4-A01" data-status="occupied">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="R4-A02" data-status="occupied">
+          <rect class="spot-rect" x="3.912" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.562" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="R4-A03" data-status="occupied">
+          <rect class="spot-rect" x="7.825" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.475" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="R4-A04" data-status="occupied">
+          <rect class="spot-rect" x="11.737" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="13.387" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="R4-A05" data-status="free">
+          <rect class="spot-rect" x="15.649" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="17.299" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="R4-A06" data-status="free">
+          <rect class="spot-rect" x="19.562" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="21.212" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="R4-A07" data-status="free">
+          <rect class="spot-rect" x="23.474" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="25.124" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="R4-A08" data-status="occupied">
+          <rect class="spot-rect" x="27.386" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.036" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="R4-A09" data-status="occupied">
+          <rect class="spot-rect" x="31.298" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="32.948" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="R4-A10" data-status="free">
+          <rect class="spot-rect" x="35.211" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="36.861" y="4.250">10</text>
+        </g>
+        <g class="spot-node" data-id="R4-A11" data-status="occupied">
+          <rect class="spot-rect" x="39.123" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="40.773" y="4.250">11</text>
+        </g>
+        <g class="spot-node" data-id="R4-A12" data-status="warning">
+          <rect class="spot-rect" x="43.035" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="44.685" y="4.250">12</text>
+        </g>
+        <g class="spot-node" data-id="R4-A13" data-status="occupied">
+          <rect class="spot-rect" x="46.948" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="48.598" y="4.250">13</text>
+        </g>
+        <g class="spot-node" data-id="R4-A14" data-status="occupied">
+          <rect class="spot-rect" x="50.860" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="52.510" y="4.250">14</text>
+        </g>
+        <g class="spot-node" data-id="R4-B01" data-status="occupied">
+          <rect class="spot-rect" x="0.000" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="12.850">01</text>
+        </g>
+        <g class="spot-node" data-id="R4-B02" data-status="free">
+          <rect class="spot-rect" x="3.912" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.562" y="12.850">02</text>
+        </g>
+        <g class="spot-node" data-id="R4-B03" data-status="occupied">
+          <rect class="spot-rect" x="7.825" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.475" y="12.850">03</text>
+        </g>
+        <g class="spot-node" data-id="R4-B04" data-status="warning">
+          <rect class="spot-rect" x="11.737" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="13.387" y="12.850">04</text>
+        </g>
+        <g class="spot-node" data-id="R4-B05" data-status="occupied">
+          <rect class="spot-rect" x="15.649" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="17.299" y="12.850">05</text>
+        </g>
+        <g class="spot-node" data-id="R4-B06" data-status="occupied">
+          <rect class="spot-rect" x="19.562" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="21.212" y="12.850">06</text>
+        </g>
+        <g class="spot-node" data-id="R4-B07" data-status="free">
+          <rect class="spot-rect" x="23.474" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="25.124" y="12.850">07</text>
+        </g>
+        <g class="spot-node" data-id="R4-B08" data-status="free">
+          <rect class="spot-rect" x="27.386" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="29.036" y="12.850">08</text>
+        </g>
+        <g class="spot-node" data-id="R4-B09" data-status="free">
+          <rect class="spot-rect" x="31.298" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="32.948" y="12.850">09</text>
+        </g>
+        <g class="spot-node" data-id="R4-B10" data-status="free">
+          <rect class="spot-rect" x="35.211" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="36.861" y="12.850">10</text>
+        </g>
+        <g class="spot-node" data-id="R4-B11" data-status="free">
+          <rect class="spot-rect" x="39.123" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="40.773" y="12.850">11</text>
+        </g>
+        <g class="spot-node" data-id="R4-B12" data-status="occupied">
+          <rect class="spot-rect" x="43.035" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="44.685" y="12.850">12</text>
+        </g>
+        <g class="spot-node" data-id="R4-B13" data-status="occupied">
+          <rect class="spot-rect" x="46.948" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="48.598" y="12.850">13</text>
+        </g>
+        <g class="spot-node" data-id="R4-B14" data-status="free">
+          <rect class="spot-rect" x="50.860" y="8.600" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="52.510" y="12.850">14</text>
+        </g>
+      </g> <!-- end R4 -->
+      <g id="R-bot" transform="rotate(-22,423.25634,-276.39562)">
+        <g class="spot-node" data-id="R-bot-01" data-status="occupied">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="R-bot-02" data-status="warning">
+          <rect class="spot-rect" x="4.060" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.710" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="R-bot-03" data-status="occupied">
+          <rect class="spot-rect" x="8.120" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.770" y="4.250">03</text>
+        </g>
+        <g class="spot-node" data-id="R-bot-04" data-status="free">
+          <rect class="spot-rect" x="12.180" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="13.830" y="4.250">04</text>
+        </g>
+        <g class="spot-node" data-id="R-bot-05" data-status="occupied">
+          <rect class="spot-rect" x="16.240" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="17.890" y="4.250">05</text>
+        </g>
+        <g class="spot-node" data-id="R-bot-06" data-status="free">
+          <rect class="spot-rect" x="20.300" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="21.950" y="4.250">06</text>
+        </g>
+        <g class="spot-node" data-id="R-bot-07" data-status="free">
+          <rect class="spot-rect" x="24.360" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="26.010" y="4.250">07</text>
+        </g>
+        <g class="spot-node" data-id="R-bot-08" data-status="free">
+          <rect class="spot-rect" x="28.420" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="30.070" y="4.250">08</text>
+        </g>
+        <g class="spot-node" data-id="R-bot-09" data-status="free">
+          <rect class="spot-rect" x="32.480" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="34.130" y="4.250">09</text>
+        </g>
+        <g class="spot-node" data-id="R-bot-10" data-status="occupied">
+          <rect class="spot-rect" x="36.540" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="38.190" y="4.250">10</text>
+        </g>
+      </g> <!-- end R-bot -->
+      <g id="R-aux" transform="translate(121.085, 143.691) rotate(-21.48)">
+        <g class="spot-node" data-id="R-aux-01" data-status="free">
+          <rect class="spot-rect" x="0.000" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="1.650" y="4.250">01</text>
+        </g>
+        <g class="spot-node" data-id="R-aux-02" data-status="free">
+          <rect class="spot-rect" x="3.805" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="5.455" y="4.250">02</text>
+        </g>
+        <g class="spot-node" data-id="R-aux-03" data-status="occupied">
+          <rect class="spot-rect" x="7.610" y="0.000" width="3.300" height="7.800" rx="0.550" ry="0.550" />
+          <text class="spot-num" x="9.260" y="4.250">03</text>
+        </g>
+      </g> <!-- end R-aux -->
+        </g>
+
+      </g> <!-- end zoomLayer -->
+    </svg>
+
+  </main>
+
+  <!-- ========================================================================
+       SPOT DETAIL DRAWER (SLIDE-IN MODAL)
+       ======================================================================== -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="spotDrawer">
+    <div class="drawer-header">
+      <div class="drawer-header-info">
+        <h2 id="drawerTitle">Espacio L1-A01</h2>
+        <p id="drawerZone">Hilera L1 - Campus UCE</p>
+      </div>
+      <button class="drawer-close" id="drawerClose" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- Status Card -->
+      <div class="drawer-card" id="drawerCard">
+        <div class="drawer-card-icon" id="drawerCardIcon">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div class="drawer-card-text">
+          <h3 id="drawerStatusText">Disponible</h3>
+          <p id="drawerStatusDesc">Espacio libre para estacionar</p>
+        </div>
+      </div>
+
+      <!-- Telemetry Details -->
+      <div class="details-table">
+        <div class="detail-row">
+          <span class="detail-label">Identificador</span>
+          <span class="detail-value" id="drawerId">L1-A01</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Sector</span>
+          <span class="detail-value" id="drawerLoc">Hilera L1 (Lado A)</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Confianza del Sensor</span>
+          <span class="detail-value" id="drawerConf">98.2%</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Coordenadas GPS</span>
+          <span class="detail-value" id="drawerGps">18.452650, -69.309480</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <a href="#" target="_blank" rel="noopener noreferrer" class="btn-maps" id="drawerMapsBtn">
+        <svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+        <span>Ruta en Google Maps</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Location toast notification for coming soon places -->
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+    <span id="toastMsg">Locación en fase de despliegue.</span>
+  </div>
+
+  <!-- ========================================================================
+       INTERACTION SCRIPTS
+       ======================================================================== -->
+  <script>
+    const spotsDatabase = {
+  "L1-A01": {
+    "id": "L1-A01",
+    "zone": "Hilera L1",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 93.9,
+    "lat": 18.452722302867834,
+    "lng": -69.31077717718787
+  },
+  "L1-A02": {
+    "id": "L1-A02",
+    "zone": "Hilera L1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.2,
+    "lat": 18.452755596476376,
+    "lng": -69.3107228469566
+  },
+  "L1-A03": {
+    "id": "L1-A03",
+    "zone": "Hilera L1",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 97.0,
+    "lat": 18.45278889008492,
+    "lng": -69.31066851672533
+  },
+  "L1-A04": {
+    "id": "L1-A04",
+    "zone": "Hilera L1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 95.9,
+    "lat": 18.452822183693463,
+    "lng": -69.31061418649405
+  },
+  "L1-A05": {
+    "id": "L1-A05",
+    "zone": "Hilera L1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.1,
+    "lat": 18.45285547730201,
+    "lng": -69.31055985626278
+  },
+  "L1-A06": {
+    "id": "L1-A06",
+    "zone": "Hilera L1",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 98.0,
+    "lat": 18.45288877091055,
+    "lng": -69.3105055260315
+  },
+  "L1-A07": {
+    "id": "L1-A07",
+    "zone": "Hilera L1",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 93.9,
+    "lat": 18.452922064519097,
+    "lng": -69.31045119580023
+  },
+  "L1-A08": {
+    "id": "L1-A08",
+    "zone": "Hilera L1",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 93.9,
+    "lat": 18.45295535812764,
+    "lng": -69.31039686556896
+  },
+  "L1-A09": {
+    "id": "L1-A09",
+    "zone": "Hilera L1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.3,
+    "lat": 18.45298865173618,
+    "lng": -69.31034253533768
+  },
+  "L1-B01": {
+    "id": "L1-B01",
+    "zone": "Hilera L1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 95.6,
+    "lat": 18.45259031417039,
+    "lng": -69.31069629441005
+  },
+  "L1-B02": {
+    "id": "L1-B02",
+    "zone": "Hilera L1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 95.3,
+    "lat": 18.452623607778936,
+    "lng": -69.31064196417879
+  },
+  "L1-B03": {
+    "id": "L1-B03",
+    "zone": "Hilera L1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 95.3,
+    "lat": 18.452656901387478,
+    "lng": -69.3105876339475
+  },
+  "L1-B04": {
+    "id": "L1-B04",
+    "zone": "Hilera L1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 96.6,
+    "lat": 18.452690194996023,
+    "lng": -69.31053330371623
+  },
+  "L1-B05": {
+    "id": "L1-B05",
+    "zone": "Hilera L1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 95.5,
+    "lat": 18.452723488604565,
+    "lng": -69.31047897348496
+  },
+  "L1-B06": {
+    "id": "L1-B06",
+    "zone": "Hilera L1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 97.1,
+    "lat": 18.45275678221311,
+    "lng": -69.31042464325368
+  },
+  "L1-B07": {
+    "id": "L1-B07",
+    "zone": "Hilera L1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 99.1,
+    "lat": 18.452790075821653,
+    "lng": -69.31037031302242
+  },
+  "L1-B08": {
+    "id": "L1-B08",
+    "zone": "Hilera L1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 97.1,
+    "lat": 18.452823369430195,
+    "lng": -69.31031598279114
+  },
+  "L1-B09": {
+    "id": "L1-B09",
+    "zone": "Hilera L1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 95.0,
+    "lat": 18.45285666303874,
+    "lng": -69.31026165255987
+  },
+  "L2-A01": {
+    "id": "L2-A01",
+    "zone": "Hilera L2",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 96.5,
+    "lat": 18.45231304577492,
+    "lng": -69.31055305979334
+  },
+  "L2-A02": {
+    "id": "L2-A02",
+    "zone": "Hilera L2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 94.4,
+    "lat": 18.452346339383464,
+    "lng": -69.31049872956206
+  },
+  "L2-A03": {
+    "id": "L2-A03",
+    "zone": "Hilera L2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.8,
+    "lat": 18.452379632992006,
+    "lng": -69.31044439933079
+  },
+  "L2-A04": {
+    "id": "L2-A04",
+    "zone": "Hilera L2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 96.5,
+    "lat": 18.452412926600548,
+    "lng": -69.31039006909951
+  },
+  "L2-A05": {
+    "id": "L2-A05",
+    "zone": "Hilera L2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 94.0,
+    "lat": 18.452446220209094,
+    "lng": -69.31033573886825
+  },
+  "L2-A06": {
+    "id": "L2-A06",
+    "zone": "Hilera L2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 94.5,
+    "lat": 18.452479513817636,
+    "lng": -69.31028140863697
+  },
+  "L2-A07": {
+    "id": "L2-A07",
+    "zone": "Hilera L2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 98.3,
+    "lat": 18.45251280742618,
+    "lng": -69.3102270784057
+  },
+  "L2-A08": {
+    "id": "L2-A08",
+    "zone": "Hilera L2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.5,
+    "lat": 18.452546101034724,
+    "lng": -69.31017274817442
+  },
+  "L2-A09": {
+    "id": "L2-A09",
+    "zone": "Hilera L2",
+    "side": "Lado A",
+    "status": "warning",
+    "conf": 49.8,
+    "lat": 18.45257939464327,
+    "lng": -69.31011841794314
+  },
+  "L2-B01": {
+    "id": "L2-B01",
+    "zone": "Hilera L2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 97.6,
+    "lat": 18.45218105707748,
+    "lng": -69.31047217701551
+  },
+  "L2-B02": {
+    "id": "L2-B02",
+    "zone": "Hilera L2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 93.9,
+    "lat": 18.45221435068602,
+    "lng": -69.31041784678425
+  },
+  "L2-B03": {
+    "id": "L2-B03",
+    "zone": "Hilera L2",
+    "side": "Lado B",
+    "status": "warning",
+    "conf": 50.8,
+    "lat": 18.452247644294562,
+    "lng": -69.31036351655297
+  },
+  "L2-B04": {
+    "id": "L2-B04",
+    "zone": "Hilera L2",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 97.7,
+    "lat": 18.452280937903108,
+    "lng": -69.3103091863217
+  },
+  "L2-B05": {
+    "id": "L2-B05",
+    "zone": "Hilera L2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 94.2,
+    "lat": 18.45231423151165,
+    "lng": -69.31025485609042
+  },
+  "L2-B06": {
+    "id": "L2-B06",
+    "zone": "Hilera L2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 94.7,
+    "lat": 18.452347525120196,
+    "lng": -69.31020052585914
+  },
+  "L2-B07": {
+    "id": "L2-B07",
+    "zone": "Hilera L2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 96.9,
+    "lat": 18.452380818728738,
+    "lng": -69.31014619562788
+  },
+  "L2-B08": {
+    "id": "L2-B08",
+    "zone": "Hilera L2",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 92.2,
+    "lat": 18.452414112337284,
+    "lng": -69.3100918653966
+  },
+  "L2-B09": {
+    "id": "L2-B09",
+    "zone": "Hilera L2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 94.7,
+    "lat": 18.452447405945826,
+    "lng": -69.31003753516534
+  },
+  "L3-A01": {
+    "id": "L3-A01",
+    "zone": "Hilera L3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 94.9,
+    "lat": 18.45194272950678,
+    "lng": -69.31034215599631
+  },
+  "L3-A02": {
+    "id": "L3-A02",
+    "zone": "Hilera L3",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 99.0,
+    "lat": 18.451976023115325,
+    "lng": -69.31028782576503
+  },
+  "L3-A03": {
+    "id": "L3-A03",
+    "zone": "Hilera L3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.6,
+    "lat": 18.452009316723867,
+    "lng": -69.31023349553377
+  },
+  "L3-A04": {
+    "id": "L3-A04",
+    "zone": "Hilera L3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 97.8,
+    "lat": 18.452042610332413,
+    "lng": -69.31017916530249
+  },
+  "L3-A05": {
+    "id": "L3-A05",
+    "zone": "Hilera L3",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 98.9,
+    "lat": 18.452075903940955,
+    "lng": -69.31012483507122
+  },
+  "L3-A06": {
+    "id": "L3-A06",
+    "zone": "Hilera L3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.8,
+    "lat": 18.4521091975495,
+    "lng": -69.31007050483994
+  },
+  "L3-A07": {
+    "id": "L3-A07",
+    "zone": "Hilera L3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 96.5,
+    "lat": 18.452142491158043,
+    "lng": -69.31001617460868
+  },
+  "L3-A08": {
+    "id": "L3-A08",
+    "zone": "Hilera L3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 95.5,
+    "lat": 18.452175784766588,
+    "lng": -69.3099618443774
+  },
+  "L3-A09": {
+    "id": "L3-A09",
+    "zone": "Hilera L3",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 93.6,
+    "lat": 18.45220907837513,
+    "lng": -69.30990751414613
+  },
+  "L3-B01": {
+    "id": "L3-B01",
+    "zone": "Hilera L3",
+    "side": "Lado B",
+    "status": "warning",
+    "conf": 42.3,
+    "lat": 18.45181074080934,
+    "lng": -69.31026127321849
+  },
+  "L3-B02": {
+    "id": "L3-B02",
+    "zone": "Hilera L3",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 98.2,
+    "lat": 18.45184403441788,
+    "lng": -69.31020694298722
+  },
+  "L3-B03": {
+    "id": "L3-B03",
+    "zone": "Hilera L3",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 95.0,
+    "lat": 18.451877328026427,
+    "lng": -69.31015261275594
+  },
+  "L3-B04": {
+    "id": "L3-B04",
+    "zone": "Hilera L3",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 96.1,
+    "lat": 18.45191062163497,
+    "lng": -69.31009828252468
+  },
+  "L3-B05": {
+    "id": "L3-B05",
+    "zone": "Hilera L3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 95.0,
+    "lat": 18.451943915243515,
+    "lng": -69.3100439522934
+  },
+  "L3-B06": {
+    "id": "L3-B06",
+    "zone": "Hilera L3",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 98.9,
+    "lat": 18.451977208852057,
+    "lng": -69.30998962206213
+  },
+  "L3-B07": {
+    "id": "L3-B07",
+    "zone": "Hilera L3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 98.6,
+    "lat": 18.452010502460602,
+    "lng": -69.30993529183085
+  },
+  "L3-B08": {
+    "id": "L3-B08",
+    "zone": "Hilera L3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 92.4,
+    "lat": 18.452043796069145,
+    "lng": -69.30988096159957
+  },
+  "L3-B09": {
+    "id": "L3-B09",
+    "zone": "Hilera L3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 91.0,
+    "lat": 18.452077089677687,
+    "lng": -69.30982663136831
+  },
+  "L4-A01": {
+    "id": "L4-A01",
+    "zone": "Hilera L4",
+    "side": "Lado A",
+    "status": "warning",
+    "conf": 46.3,
+    "lat": 18.45158187299886,
+    "lng": -69.31011928989963
+  },
+  "L4-A02": {
+    "id": "L4-A02",
+    "zone": "Hilera L4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 98.8,
+    "lat": 18.451615166607404,
+    "lng": -69.31006495966837
+  },
+  "L4-A03": {
+    "id": "L4-A03",
+    "zone": "Hilera L4",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 98.4,
+    "lat": 18.451648460215946,
+    "lng": -69.31001062943709
+  },
+  "L4-A04": {
+    "id": "L4-A04",
+    "zone": "Hilera L4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 93.4,
+    "lat": 18.45168175382449,
+    "lng": -69.30995629920582
+  },
+  "L4-A05": {
+    "id": "L4-A05",
+    "zone": "Hilera L4",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 97.9,
+    "lat": 18.451715047433034,
+    "lng": -69.30990196897454
+  },
+  "L4-A06": {
+    "id": "L4-A06",
+    "zone": "Hilera L4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 97.1,
+    "lat": 18.45174834104158,
+    "lng": -69.30984763874328
+  },
+  "L4-A07": {
+    "id": "L4-A07",
+    "zone": "Hilera L4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 97.6,
+    "lat": 18.45178163465012,
+    "lng": -69.309793308512
+  },
+  "L4-A08": {
+    "id": "L4-A08",
+    "zone": "Hilera L4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 96.6,
+    "lat": 18.451814928258667,
+    "lng": -69.30973897828073
+  },
+  "L4-A09": {
+    "id": "L4-A09",
+    "zone": "Hilera L4",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 96.6,
+    "lat": 18.45184822186721,
+    "lng": -69.30968464804945
+  },
+  "L4-B01": {
+    "id": "L4-B01",
+    "zone": "Hilera L4",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 94.7,
+    "lat": 18.451449884301418,
+    "lng": -69.31003840712182
+  },
+  "L4-B02": {
+    "id": "L4-B02",
+    "zone": "Hilera L4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 92.8,
+    "lat": 18.45148317790996,
+    "lng": -69.30998407689054
+  },
+  "L4-B03": {
+    "id": "L4-B03",
+    "zone": "Hilera L4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 91.5,
+    "lat": 18.451516471518506,
+    "lng": -69.30992974665928
+  },
+  "L4-B04": {
+    "id": "L4-B04",
+    "zone": "Hilera L4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 97.2,
+    "lat": 18.451549765127048,
+    "lng": -69.309875416428
+  },
+  "L4-B05": {
+    "id": "L4-B05",
+    "zone": "Hilera L4",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 93.9,
+    "lat": 18.451583058735594,
+    "lng": -69.30982108619673
+  },
+  "L4-B06": {
+    "id": "L4-B06",
+    "zone": "Hilera L4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 93.6,
+    "lat": 18.451616352344136,
+    "lng": -69.30976675596546
+  },
+  "L4-B07": {
+    "id": "L4-B07",
+    "zone": "Hilera L4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 91.4,
+    "lat": 18.45164964595268,
+    "lng": -69.30971242573418
+  },
+  "L4-B08": {
+    "id": "L4-B08",
+    "zone": "Hilera L4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 95.0,
+    "lat": 18.451682939561223,
+    "lng": -69.30965809550291
+  },
+  "L4-B09": {
+    "id": "L4-B09",
+    "zone": "Hilera L4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 98.7,
+    "lat": 18.45171623316977,
+    "lng": -69.30960376527163
+  },
+  "LW-top-01": {
+    "id": "LW-top-01",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 95.5,
+    "lat": 18.453250101495193,
+    "lng": -69.31051572227469
+  },
+  "LW-top-02": {
+    "id": "LW-top-02",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 91.5,
+    "lat": 18.45328397499671,
+    "lng": -69.31045867279617
+  },
+  "LW-top-03": {
+    "id": "LW-top-03",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "warning",
+    "conf": 47.9,
+    "lat": 18.45331784849823,
+    "lng": -69.31040162331766
+  },
+  "LW-top-04": {
+    "id": "LW-top-04",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 98.9,
+    "lat": 18.45335172199975,
+    "lng": -69.31034457383915
+  },
+  "LW-top-05": {
+    "id": "LW-top-05",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 91.6,
+    "lat": 18.453385595501263,
+    "lng": -69.31028752436063
+  },
+  "LW-top-06": {
+    "id": "LW-top-06",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 91.6,
+    "lat": 18.45341946900278,
+    "lng": -69.3102304748821
+  },
+  "LW-top-07": {
+    "id": "LW-top-07",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 98.2,
+    "lat": 18.4534533425043,
+    "lng": -69.31017342540359
+  },
+  "LW-top-08": {
+    "id": "LW-top-08",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 96.0,
+    "lat": 18.45348721600582,
+    "lng": -69.31011637592508
+  },
+  "LW-top-09": {
+    "id": "LW-top-09",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 98.9,
+    "lat": 18.453521089507333,
+    "lng": -69.31005932644656
+  },
+  "LW-top-10": {
+    "id": "LW-top-10",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 95.8,
+    "lat": 18.453554963008852,
+    "lng": -69.31000227696805
+  },
+  "LW-top-11": {
+    "id": "LW-top-11",
+    "zone": "Hilera Superior Oeste",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 97.1,
+    "lat": 18.45358883651037,
+    "lng": -69.30994522748954
+  },
+  "LE-top-01": {
+    "id": "LE-top-01",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 91.3,
+    "lat": 18.453874521495194,
+    "lng": -69.3094756822747
+  },
+  "LE-top-02": {
+    "id": "LE-top-02",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 91.7,
+    "lat": 18.453908394996713,
+    "lng": -69.30941863279618
+  },
+  "LE-top-03": {
+    "id": "LE-top-03",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 97.6,
+    "lat": 18.45394226849823,
+    "lng": -69.30936158331765
+  },
+  "LE-top-04": {
+    "id": "LE-top-04",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 97.1,
+    "lat": 18.453976141999746,
+    "lng": -69.30930453383914
+  },
+  "LE-top-05": {
+    "id": "LE-top-05",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 93.7,
+    "lat": 18.454010015501265,
+    "lng": -69.30924748436063
+  },
+  "LE-top-06": {
+    "id": "LE-top-06",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 93.2,
+    "lat": 18.454043889002783,
+    "lng": -69.30919043488211
+  },
+  "LE-top-07": {
+    "id": "LE-top-07",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 96.6,
+    "lat": 18.4540777625043,
+    "lng": -69.3091333854036
+  },
+  "LE-top-08": {
+    "id": "LE-top-08",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 93.6,
+    "lat": 18.454111636005816,
+    "lng": -69.30907633592508
+  },
+  "LE-top-09": {
+    "id": "LE-top-09",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 95.2,
+    "lat": 18.454145509507335,
+    "lng": -69.30901928644656
+  },
+  "LE-top-10": {
+    "id": "LE-top-10",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 92.1,
+    "lat": 18.454179383008853,
+    "lng": -69.30896223696804
+  },
+  "LE-top-11": {
+    "id": "LE-top-11",
+    "zone": "Hilera Superior Este",
+    "side": "Fila \u00danica",
+    "status": "warning",
+    "conf": 49.7,
+    "lat": 18.45421325651037,
+    "lng": -69.30890518748953
+  },
+  "R1-A01": {
+    "id": "R1-A01",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 96.4,
+    "lat": 18.45340354399076,
+    "lng": -69.30962026766181
+  },
+  "R1-A02": {
+    "id": "R1-A02",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 98.8,
+    "lat": 18.453440336249695,
+    "lng": -69.30956022815201
+  },
+  "R1-A03": {
+    "id": "R1-A03",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 98.9,
+    "lat": 18.453477119103653,
+    "lng": -69.30950020398971
+  },
+  "R1-A04": {
+    "id": "R1-A04",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 93.6,
+    "lat": 18.453513911362585,
+    "lng": -69.3094401644799
+  },
+  "R1-A05": {
+    "id": "R1-A05",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 96.2,
+    "lat": 18.453550694216545,
+    "lng": -69.30938014031761
+  },
+  "R1-A06": {
+    "id": "R1-A06",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 95.7,
+    "lat": 18.453587486475477,
+    "lng": -69.3093201008078
+  },
+  "R1-A07": {
+    "id": "R1-A07",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.8,
+    "lat": 18.45362426932944,
+    "lng": -69.3092600766455
+  },
+  "R1-A08": {
+    "id": "R1-A08",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "warning",
+    "conf": 48.3,
+    "lat": 18.45366106158837,
+    "lng": -69.3092000371357
+  },
+  "R1-A09": {
+    "id": "R1-A09",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 95.2,
+    "lat": 18.453697844442328,
+    "lng": -69.3091400129734
+  },
+  "R1-A10": {
+    "id": "R1-A10",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 92.1,
+    "lat": 18.453734636701263,
+    "lng": -69.3090799734636
+  },
+  "R1-A11": {
+    "id": "R1-A11",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "warning",
+    "conf": 45.7,
+    "lat": 18.45377141955522,
+    "lng": -69.3090199493013
+  },
+  "R1-A12": {
+    "id": "R1-A12",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.6,
+    "lat": 18.453808211814152,
+    "lng": -69.30895990979148
+  },
+  "R1-A13": {
+    "id": "R1-A13",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 95.0,
+    "lat": 18.453844994668113,
+    "lng": -69.3088998856292
+  },
+  "R1-A14": {
+    "id": "R1-A14",
+    "zone": "Hilera R1",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 93.4,
+    "lat": 18.453881786927045,
+    "lng": -69.30883984611938
+  },
+  "R1-B01": {
+    "id": "R1-B01",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 94.7,
+    "lat": 18.45327155529332,
+    "lng": -69.309539384884
+  },
+  "R1-B02": {
+    "id": "R1-B02",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 96.9,
+    "lat": 18.45330834755225,
+    "lng": -69.30947934537419
+  },
+  "R1-B03": {
+    "id": "R1-B03",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 93.5,
+    "lat": 18.45334513040621,
+    "lng": -69.30941932121189
+  },
+  "R1-B04": {
+    "id": "R1-B04",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 99.7,
+    "lat": 18.453381922665145,
+    "lng": -69.30935928170209
+  },
+  "R1-B05": {
+    "id": "R1-B05",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 97.8,
+    "lat": 18.453418705519102,
+    "lng": -69.30929925753979
+  },
+  "R1-B06": {
+    "id": "R1-B06",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 95.4,
+    "lat": 18.453455497778037,
+    "lng": -69.30923921802997
+  },
+  "R1-B07": {
+    "id": "R1-B07",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 96.6,
+    "lat": 18.453492280631995,
+    "lng": -69.30917919386769
+  },
+  "R1-B08": {
+    "id": "R1-B08",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 95.7,
+    "lat": 18.453529072890927,
+    "lng": -69.30911915435787
+  },
+  "R1-B09": {
+    "id": "R1-B09",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 98.8,
+    "lat": 18.453565855744888,
+    "lng": -69.30905913019558
+  },
+  "R1-B10": {
+    "id": "R1-B10",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 94.2,
+    "lat": 18.45360264800382,
+    "lng": -69.30899909068577
+  },
+  "R1-B11": {
+    "id": "R1-B11",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 98.4,
+    "lat": 18.453639430857777,
+    "lng": -69.30893906652348
+  },
+  "R1-B12": {
+    "id": "R1-B12",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 95.2,
+    "lat": 18.453676223116712,
+    "lng": -69.30887902701367
+  },
+  "R1-B13": {
+    "id": "R1-B13",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 98.5,
+    "lat": 18.45371300597067,
+    "lng": -69.30881900285138
+  },
+  "R1-B14": {
+    "id": "R1-B14",
+    "zone": "Hilera R1",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 98.2,
+    "lat": 18.4537497982296,
+    "lng": -69.30875896334156
+  },
+  "R2-A01": {
+    "id": "R2-A01",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 94.5,
+    "lat": 18.453026862867834,
+    "lng": -69.30938973718787
+  },
+  "R2-A02": {
+    "id": "R2-A02",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 93.4,
+    "lat": 18.453063655126765,
+    "lng": -69.30932969767805
+  },
+  "R2-A03": {
+    "id": "R2-A03",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 92.8,
+    "lat": 18.453100437980726,
+    "lng": -69.30926967351577
+  },
+  "R2-A04": {
+    "id": "R2-A04",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 95.7,
+    "lat": 18.45313723023966,
+    "lng": -69.30920963400595
+  },
+  "R2-A05": {
+    "id": "R2-A05",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 96.8,
+    "lat": 18.453174013093616,
+    "lng": -69.30914960984366
+  },
+  "R2-A06": {
+    "id": "R2-A06",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 98.2,
+    "lat": 18.45321080535255,
+    "lng": -69.30908957033385
+  },
+  "R2-A07": {
+    "id": "R2-A07",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 96.7,
+    "lat": 18.45324758820651,
+    "lng": -69.30902954617156
+  },
+  "R2-A08": {
+    "id": "R2-A08",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 95.1,
+    "lat": 18.45328438046544,
+    "lng": -69.30896950666174
+  },
+  "R2-A09": {
+    "id": "R2-A09",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 98.6,
+    "lat": 18.4533211633194,
+    "lng": -69.30890948249946
+  },
+  "R2-A10": {
+    "id": "R2-A10",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 93.8,
+    "lat": 18.453357955578333,
+    "lng": -69.30884944298964
+  },
+  "R2-A11": {
+    "id": "R2-A11",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 96.3,
+    "lat": 18.45339473843229,
+    "lng": -69.30878941882736
+  },
+  "R2-A12": {
+    "id": "R2-A12",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 98.0,
+    "lat": 18.453431530691226,
+    "lng": -69.30872937931754
+  },
+  "R2-A13": {
+    "id": "R2-A13",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.4,
+    "lat": 18.453468313545184,
+    "lng": -69.30866935515525
+  },
+  "R2-A14": {
+    "id": "R2-A14",
+    "zone": "Hilera R2",
+    "side": "Lado A",
+    "status": "warning",
+    "conf": 45.5,
+    "lat": 18.45350510580412,
+    "lng": -69.30860931564544
+  },
+  "R2-B01": {
+    "id": "R2-B01",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 92.1,
+    "lat": 18.45289487417039,
+    "lng": -69.30930885441005
+  },
+  "R2-B02": {
+    "id": "R2-B02",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 99.7,
+    "lat": 18.452931666429325,
+    "lng": -69.30924881490024
+  },
+  "R2-B03": {
+    "id": "R2-B03",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 94.5,
+    "lat": 18.452968449283283,
+    "lng": -69.30918879073795
+  },
+  "R2-B04": {
+    "id": "R2-B04",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 96.3,
+    "lat": 18.453005241542215,
+    "lng": -69.30912875122813
+  },
+  "R2-B05": {
+    "id": "R2-B05",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 97.9,
+    "lat": 18.453042024396176,
+    "lng": -69.30906872706585
+  },
+  "R2-B06": {
+    "id": "R2-B06",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 95.7,
+    "lat": 18.453078816655108,
+    "lng": -69.30900868755603
+  },
+  "R2-B07": {
+    "id": "R2-B07",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 91.9,
+    "lat": 18.453115599509065,
+    "lng": -69.30894866339374
+  },
+  "R2-B08": {
+    "id": "R2-B08",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 99.5,
+    "lat": 18.453152391768,
+    "lng": -69.30888862388393
+  },
+  "R2-B09": {
+    "id": "R2-B09",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 96.8,
+    "lat": 18.453189174621958,
+    "lng": -69.30882859972164
+  },
+  "R2-B10": {
+    "id": "R2-B10",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 92.3,
+    "lat": 18.45322596688089,
+    "lng": -69.30876856021183
+  },
+  "R2-B11": {
+    "id": "R2-B11",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 91.3,
+    "lat": 18.45326274973485,
+    "lng": -69.30870853604954
+  },
+  "R2-B12": {
+    "id": "R2-B12",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 94.1,
+    "lat": 18.453299541993783,
+    "lng": -69.30864849653972
+  },
+  "R2-B13": {
+    "id": "R2-B13",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 97.0,
+    "lat": 18.453336324847744,
+    "lng": -69.30858847237744
+  },
+  "R2-B14": {
+    "id": "R2-B14",
+    "zone": "Hilera R2",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 94.6,
+    "lat": 18.453373117106675,
+    "lng": -69.30852843286762
+  },
+  "R3-A01": {
+    "id": "R3-A01",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.4,
+    "lat": 18.452593954177836,
+    "lng": -69.30918449168763
+  },
+  "R3-A02": {
+    "id": "R3-A02",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 95.8,
+    "lat": 18.452630746436768,
+    "lng": -69.30912445217783
+  },
+  "R3-A03": {
+    "id": "R3-A03",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 99.4,
+    "lat": 18.452667529290725,
+    "lng": -69.30906442801553
+  },
+  "R3-A04": {
+    "id": "R3-A04",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 99.2,
+    "lat": 18.45270432154966,
+    "lng": -69.30900438850571
+  },
+  "R3-A05": {
+    "id": "R3-A05",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 93.8,
+    "lat": 18.452741104403618,
+    "lng": -69.30894436434343
+  },
+  "R3-A06": {
+    "id": "R3-A06",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 95.8,
+    "lat": 18.452777896662553,
+    "lng": -69.30888432483361
+  },
+  "R3-A07": {
+    "id": "R3-A07",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 96.7,
+    "lat": 18.45281467951651,
+    "lng": -69.30882430067132
+  },
+  "R3-A08": {
+    "id": "R3-A08",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 96.6,
+    "lat": 18.452851471775443,
+    "lng": -69.30876426116151
+  },
+  "R3-A09": {
+    "id": "R3-A09",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 94.0,
+    "lat": 18.452888254629404,
+    "lng": -69.30870423699922
+  },
+  "R3-A10": {
+    "id": "R3-A10",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 97.0,
+    "lat": 18.452925046888335,
+    "lng": -69.3086441974894
+  },
+  "R3-A11": {
+    "id": "R3-A11",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 98.3,
+    "lat": 18.452961829742293,
+    "lng": -69.30858417332712
+  },
+  "R3-A12": {
+    "id": "R3-A12",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 99.6,
+    "lat": 18.45299862200123,
+    "lng": -69.3085241338173
+  },
+  "R3-A13": {
+    "id": "R3-A13",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 97.3,
+    "lat": 18.453035404855186,
+    "lng": -69.30846410965502
+  },
+  "R3-A14": {
+    "id": "R3-A14",
+    "zone": "Hilera R3",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 99.3,
+    "lat": 18.453072197114118,
+    "lng": -69.3084040701452
+  },
+  "R3-B01": {
+    "id": "R3-B01",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 93.0,
+    "lat": 18.452461965480392,
+    "lng": -69.30910360890982
+  },
+  "R3-B02": {
+    "id": "R3-B02",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 92.4,
+    "lat": 18.452498757739324,
+    "lng": -69.3090435694
+  },
+  "R3-B03": {
+    "id": "R3-B03",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 98.5,
+    "lat": 18.452535540593285,
+    "lng": -69.30898354523771
+  },
+  "R3-B04": {
+    "id": "R3-B04",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 94.6,
+    "lat": 18.452572332852217,
+    "lng": -69.3089235057279
+  },
+  "R3-B05": {
+    "id": "R3-B05",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 94.5,
+    "lat": 18.452609115706178,
+    "lng": -69.30886348156561
+  },
+  "R3-B06": {
+    "id": "R3-B06",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 92.5,
+    "lat": 18.45264590796511,
+    "lng": -69.30880344205579
+  },
+  "R3-B07": {
+    "id": "R3-B07",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 98.8,
+    "lat": 18.452682690819067,
+    "lng": -69.30874341789351
+  },
+  "R3-B08": {
+    "id": "R3-B08",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 98.4,
+    "lat": 18.452719483078003,
+    "lng": -69.30868337838369
+  },
+  "R3-B09": {
+    "id": "R3-B09",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 94.5,
+    "lat": 18.45275626593196,
+    "lng": -69.3086233542214
+  },
+  "R3-B10": {
+    "id": "R3-B10",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 96.6,
+    "lat": 18.452793058190892,
+    "lng": -69.30856331471159
+  },
+  "R3-B11": {
+    "id": "R3-B11",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "warning",
+    "conf": 50.9,
+    "lat": 18.452829841044853,
+    "lng": -69.3085032905493
+  },
+  "R3-B12": {
+    "id": "R3-B12",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 93.1,
+    "lat": 18.452866633303785,
+    "lng": -69.30844325103949
+  },
+  "R3-B13": {
+    "id": "R3-B13",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 92.3,
+    "lat": 18.452903416157746,
+    "lng": -69.3083832268772
+  },
+  "R3-B14": {
+    "id": "R3-B14",
+    "zone": "Hilera R3",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 97.9,
+    "lat": 18.452940208416678,
+    "lng": -69.30832318736738
+  },
+  "R4-A01": {
+    "id": "R4-A01",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 94.2,
+    "lat": 18.452222613138225,
+    "lng": -69.3089782174062
+  },
+  "R4-A02": {
+    "id": "R4-A02",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.3,
+    "lat": 18.45225292800762,
+    "lng": -69.30891466096082
+  },
+  "R4-A03": {
+    "id": "R4-A03",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 95.0,
+    "lat": 18.452283250626213,
+    "lng": -69.3088510882689
+  },
+  "R4-A04": {
+    "id": "R4-A04",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 92.7,
+    "lat": 18.452313565495604,
+    "lng": -69.30878753182351
+  },
+  "R4-A05": {
+    "id": "R4-A05",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 99.3,
+    "lat": 18.452343880364996,
+    "lng": -69.30872397537813
+  },
+  "R4-A06": {
+    "id": "R4-A06",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 95.7,
+    "lat": 18.45237420298359,
+    "lng": -69.30866040268621
+  },
+  "R4-A07": {
+    "id": "R4-A07",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 98.7,
+    "lat": 18.452404517852983,
+    "lng": -69.30859684624083
+  },
+  "R4-A08": {
+    "id": "R4-A08",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 98.3,
+    "lat": 18.452434832722375,
+    "lng": -69.30853328979545
+  },
+  "R4-A09": {
+    "id": "R4-A09",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 92.9,
+    "lat": 18.45246514759177,
+    "lng": -69.30846973335007
+  },
+  "R4-A10": {
+    "id": "R4-A10",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "free",
+    "conf": 97.7,
+    "lat": 18.452495470210362,
+    "lng": -69.30840616065815
+  },
+  "R4-A11": {
+    "id": "R4-A11",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 94.3,
+    "lat": 18.452525785079754,
+    "lng": -69.30834260421277
+  },
+  "R4-A12": {
+    "id": "R4-A12",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "warning",
+    "conf": 44.8,
+    "lat": 18.452556099949145,
+    "lng": -69.30827904776739
+  },
+  "R4-A13": {
+    "id": "R4-A13",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 91.6,
+    "lat": 18.45258642256774,
+    "lng": -69.30821547507547
+  },
+  "R4-A14": {
+    "id": "R4-A14",
+    "zone": "Hilera R4",
+    "side": "Lado A",
+    "status": "occupied",
+    "conf": 97.5,
+    "lat": 18.452616737437133,
+    "lng": -69.30815191863009
+  },
+  "R4-B01": {
+    "id": "R4-B01",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 93.9,
+    "lat": 18.452082892936208,
+    "lng": -69.30891157428842
+  },
+  "R4-B02": {
+    "id": "R4-B02",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 96.7,
+    "lat": 18.452113207805603,
+    "lng": -69.30884801784303
+  },
+  "R4-B03": {
+    "id": "R4-B03",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 96.7,
+    "lat": 18.452143530424195,
+    "lng": -69.30878444515112
+  },
+  "R4-B04": {
+    "id": "R4-B04",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "warning",
+    "conf": 52.4,
+    "lat": 18.452173845293586,
+    "lng": -69.30872088870574
+  },
+  "R4-B05": {
+    "id": "R4-B05",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 93.8,
+    "lat": 18.45220416016298,
+    "lng": -69.30865733226035
+  },
+  "R4-B06": {
+    "id": "R4-B06",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 91.2,
+    "lat": 18.452234482781574,
+    "lng": -69.30859375956844
+  },
+  "R4-B07": {
+    "id": "R4-B07",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 99.0,
+    "lat": 18.452264797650965,
+    "lng": -69.30853020312306
+  },
+  "R4-B08": {
+    "id": "R4-B08",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 95.1,
+    "lat": 18.452295112520357,
+    "lng": -69.30846664667767
+  },
+  "R4-B09": {
+    "id": "R4-B09",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 97.2,
+    "lat": 18.452325427389752,
+    "lng": -69.30840309023229
+  },
+  "R4-B10": {
+    "id": "R4-B10",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 99.7,
+    "lat": 18.452355750008344,
+    "lng": -69.30833951754036
+  },
+  "R4-B11": {
+    "id": "R4-B11",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 93.7,
+    "lat": 18.452386064877736,
+    "lng": -69.30827596109498
+  },
+  "R4-B12": {
+    "id": "R4-B12",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 96.0,
+    "lat": 18.45241637974713,
+    "lng": -69.3082124046496
+  },
+  "R4-B13": {
+    "id": "R4-B13",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "occupied",
+    "conf": 93.9,
+    "lat": 18.452446702365723,
+    "lng": -69.30814883195768
+  },
+  "R4-B14": {
+    "id": "R4-B14",
+    "zone": "Hilera R4",
+    "side": "Lado B",
+    "status": "free",
+    "conf": 98.5,
+    "lat": 18.452477017235115,
+    "lng": -69.3080852755123
+  },
+  "R-bot-01": {
+    "id": "R-bot-01",
+    "zone": "Hilera Inferior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 94.7,
+    "lat": 18.451904323573125,
+    "lng": -69.30862769395331
+  },
+  "R-bot-02": {
+    "id": "R-bot-02",
+    "zone": "Hilera Inferior Este",
+    "side": "Fila \u00danica",
+    "status": "warning",
+    "conf": 54.3,
+    "lat": 18.45193169982297,
+    "lng": -69.30855993535722
+  },
+  "R-bot-03": {
+    "id": "R-bot-03",
+    "zone": "Hilera Inferior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 92.0,
+    "lat": 18.451959076072818,
+    "lng": -69.30849217676113
+  },
+  "R-bot-04": {
+    "id": "R-bot-04",
+    "zone": "Hilera Inferior Este",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 99.2,
+    "lat": 18.451986452322664,
+    "lng": -69.30842441816505
+  },
+  "R-bot-05": {
+    "id": "R-bot-05",
+    "zone": "Hilera Inferior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 92.6,
+    "lat": 18.45201382857251,
+    "lng": -69.30835665956894
+  },
+  "R-bot-06": {
+    "id": "R-bot-06",
+    "zone": "Hilera Inferior Este",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 93.8,
+    "lat": 18.452041204822358,
+    "lng": -69.30828890097285
+  },
+  "R-bot-07": {
+    "id": "R-bot-07",
+    "zone": "Hilera Inferior Este",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 96.2,
+    "lat": 18.452068581072204,
+    "lng": -69.30822114237677
+  },
+  "R-bot-08": {
+    "id": "R-bot-08",
+    "zone": "Hilera Inferior Este",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 96.8,
+    "lat": 18.45209595732205,
+    "lng": -69.30815338378068
+  },
+  "R-bot-09": {
+    "id": "R-bot-09",
+    "zone": "Hilera Inferior Este",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 98.6,
+    "lat": 18.452123333571897,
+    "lng": -69.30808562518457
+  },
+  "R-bot-10": {
+    "id": "R-bot-10",
+    "zone": "Hilera Inferior Este",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 96.8,
+    "lat": 18.452150709821744,
+    "lng": -69.30801786658849
+  },
+  "R-aux-01": {
+    "id": "R-aux-01",
+    "zone": "Hilera Auxiliar Sur",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 99.4,
+    "lat": 18.4518091131497,
+    "lng": -69.3088671272151
+  },
+  "R-aux-02": {
+    "id": "R-aux-02",
+    "zone": "Hilera Auxiliar Sur",
+    "side": "Fila \u00danica",
+    "status": "free",
+    "conf": 98.1,
+    "lat": 18.451834192573212,
+    "lng": -69.30880339415761
+  },
+  "R-aux-03": {
+    "id": "R-aux-03",
+    "zone": "Hilera Auxiliar Sur",
+    "side": "Fila \u00danica",
+    "status": "occupied",
+    "conf": 92.7,
+    "lat": 18.451859271996724,
+    "lng": -69.30873966110012
+  }
+};
+
+    let activeFilter = 'all';
+    let selectedSpotNode = null;
+
+    // Elements
+    const drawer = document.getElementById('spotDrawer');
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const drawerClose = document.getElementById('drawerClose');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const drawerZone = document.getElementById('drawerZone');
+    const drawerCard = document.getElementById('drawerCard');
+    const drawerCardIcon = document.getElementById('drawerCardIcon');
+    const drawerStatusText = document.getElementById('drawerStatusText');
+    const drawerStatusDesc = document.getElementById('drawerStatusDesc');
+    const drawerId = document.getElementById('drawerId');
+    const drawerLoc = document.getElementById('drawerLoc');
+    const drawerConf = document.getElementById('drawerConf');
+    const drawerGps = document.getElementById('drawerGps');
+    const drawerMapsBtn = document.getElementById('drawerMapsBtn');
+
+    const searchContainer = document.getElementById('searchContainer');
+    const searchWrapper = document.getElementById('searchWrapper');
+    const locationInput = document.getElementById('locationInput');
+    const locationItems = document.querySelectorAll('.location-item');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+
+    // ========================================================================
+    // PURE ZOOM ENGINE (UNIFORM & SYMMETRIC IN ALL DIRECTIONS)
+    // Anchored at exact geometric center (92, 91)
+    // ========================================================================
+    let currentZoom = 1.0;
+    const minZoom = 1.0;
+    const maxZoom = 2.4;
+    const zoomStep = 0.20;
+
+    const zoomLayer = document.getElementById('zoomLayer');
+    const zoomBadge = document.getElementById('zoomBadge');
+    const btnZoomIn = document.getElementById('btnZoomIn');
+    const btnZoomOut = document.getElementById('btnZoomOut');
+    const btnResetZoom = document.getElementById('btnResetZoom');
+    const mapContainer = document.getElementById('mapContainer');
+
+    function updateZoom(newZoom) {
+      currentZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+      zoomLayer.setAttribute('transform', 'translate(92, 91) scale(' + currentZoom.toFixed(3) + ') translate(-92, -91)');
+      zoomBadge.textContent = Math.round(currentZoom * 100) + '%';
+    }
+
+    btnZoomIn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      updateZoom(currentZoom + zoomStep);
+    });
+
+    btnZoomOut.addEventListener('click', function(e) {
+      e.stopPropagation();
+      updateZoom(currentZoom - zoomStep);
+    });
+
+    btnResetZoom.addEventListener('click', function(e) {
+      e.stopPropagation();
+      updateZoom(1.0);
+    });
+
+    // Wheel Zoom only (strictly no horizontal or vertical movement)
+    mapContainer.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? zoomStep : -zoomStep;
+      updateZoom(currentZoom + delta);
+    }, { passive: false });
+
+    // Touch pinch zoom (strictly no horizontal or vertical movement)
+    let touchStartDist = null;
+    mapContainer.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        touchStartDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+      }
+    }, { passive: true });
+
+    mapContainer.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2 && touchStartDist) {
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const ratio = dist / touchStartDist;
+        updateZoom(currentZoom * ratio);
+        touchStartDist = dist;
+      }
+    }, { passive: false });
+
+    mapContainer.addEventListener('touchend', function() {
+      touchStartDist = null;
+    });
+
+    // Spot selection and modal drawer
+    document.querySelectorAll('.spot-node').forEach(function(node) {
+      node.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const spotId = node.getAttribute('data-id');
+        openSpot(spotId, node);
+      });
+    });
+
+    function openSpot(spotId, node) {
+      const spot = spotsDatabase[spotId];
+      if (!spot) return;
+
+      if (selectedSpotNode) {
+        selectedSpotNode.classList.remove('selected');
+      }
+      selectedSpotNode = node;
+      node.classList.add('selected');
+
+      drawerTitle.textContent = 'Espacio ' + spot.id;
+      drawerZone.textContent = spot.zone;
+      drawerId.textContent = spot.id;
+      drawerLoc.textContent = spot.zone + ' (' + spot.side + ')';
+      drawerConf.textContent = spot.conf.toFixed(1) + '% (Modelo Óptico)';
+      drawerGps.textContent = spot.lat.toFixed(6) + ', ' + spot.lng.toFixed(6);
+
+      drawerCard.className = 'drawer-card ' + spot.status;
+      if (spot.status === 'free') {
+        drawerStatusText.textContent = 'Disponible';
+        drawerStatusDesc.textContent = 'Espacio libre para estacionar';
+        drawerCardIcon.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      } else if (spot.status === 'occupied') {
+        drawerStatusText.textContent = 'Ocupado';
+        drawerStatusDesc.textContent = 'Vehículo detectado en la plaza';
+        drawerCardIcon.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+      } else {
+        drawerStatusText.textContent = 'Baja Confianza';
+        drawerStatusDesc.textContent = 'En proceso de validación óptica';
+        drawerCardIcon.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+      }
+
+      drawerMapsBtn.href = 'https://www.google.com/maps/dir/?api=1&destination=' + spot.lat + ',' + spot.lng;
+
+      drawer.classList.add('active');
+      drawerBackdrop.classList.add('active');
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove('active');
+      drawerBackdrop.classList.remove('active');
+      if (selectedSpotNode) {
+        selectedSpotNode.classList.remove('selected');
+        selectedSpotNode = null;
+      }
+    }
+
+    drawerClose.addEventListener('click', closeDrawer);
+    drawerBackdrop.addEventListener('click', closeDrawer);
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeDrawer();
+        searchContainer.classList.remove('active');
+      }
+    });
+
+    // Status filter buttons
+    document.querySelectorAll('.filter-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        activeFilter = btn.getAttribute('data-filter');
+
+        document.querySelectorAll('.spot-node').forEach(function(node) {
+          const st = node.getAttribute('data-status');
+          if (activeFilter === 'all') {
+            node.classList.remove('dimmed');
+          } else if (activeFilter === 'free') {
+            node.classList.toggle('dimmed', st !== 'free');
+          } else if (activeFilter === 'occupied') {
+            node.classList.toggle('dimmed', st !== 'occupied');
+          }
+        });
+      });
+    });
+
+    // Locations dropdown
+    searchWrapper.addEventListener('click', function(e) {
+      e.stopPropagation();
+      searchContainer.classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!searchContainer.contains(e.target)) {
+        searchContainer.classList.remove('active');
+      }
+    });
+
+    let toastTimer;
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      toastMsg.textContent = message;
+      toast.classList.add('show');
+      toastTimer = setTimeout(function() {
+        toast.classList.remove('show');
+      }, 3600);
+    }
+
+    locationItems.forEach(function(item) {
+      item.addEventListener('click', function() {
+        const isActive = item.getAttribute('data-active') === 'true';
+        const name = item.getAttribute('data-name');
+        if (isActive) {
+          locationInput.value = name;
+          locationItems.forEach(function(i) { i.classList.remove('selected'); });
+          item.classList.add('selected');
+          searchContainer.classList.remove('active');
+        } else {
+          showToast(name + ' estará disponible próximamente. La locación activa es el Campus Principal UCE.');
+          searchContainer.classList.remove('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
