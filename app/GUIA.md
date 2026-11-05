@@ -67,7 +67,7 @@ A continuacion se describen los endpoints principales que la aplicacion web nece
 
 ## 4. Como Utilizar la Skill (AGENTS.md)
 
-En la raiz del proyecto se encuentra el archivo `AGENTS.md`. Este documento no es una simple lectura para personas, sino una especificacion formal disenada especificamente para actuar como una directiva de comportamiento (skill) para agentes de inteligencia artificial (como Antigravity, Claude, ChatGPT o Cursor).
+En la carpeta `app/` se encuentra el archivo `AGENTS.md` (`app/AGENTS.md`). Este documento no es una simple lectura para personas, sino una especificacion formal disenada especificamente para actuar como una directiva de comportamiento (skill) para agentes de inteligencia artificial (como Antigravity, Claude, ChatGPT o Cursor).
 
 ### 4.1 Cual es el Proposito de la Skill
 Cuando un programador solicita a un modelo de inteligencia artificial que realice un cambio en la interfaz web, el modelo corre el riesgo de reinventar el diseno, cambiar los colores institucionales, agregar emojis no deseados, alterar el tamano de los 219 rectangulos de estacionamiento o arruinar la formula matematica que mantiene el zoom perfectamente centrado en las coordenadas (92, 91).
